@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <title>Starkregen/Hochwasser Demo </title>
+  <!-- Include the CesiumJS JavaScript and CSS files -->
+
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Cesium.js"></script>
+
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  
+  <style>
+    
+    body{
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        height: 100vh;
+        display: block;
+    }
+    header{
+      display: flex;
+      align-items: center;
+      text-align: center;
+      justify-content: center;
+      align-content: center;
+      background-color: rgba(12, 11, 11, 0.836);
+      border: 0 solid black;
+      color: white;
+      font-size: 25px;
+      height: 5%;
+    }
+    header img {
+      margin-right: 10px; /* Adjust the value to control the space between the image and the text */
+    }
+
+    header span {
+      display: inline-block;
+    } 
+    /* General styles for all infoboxes */
+    .cesium-infoBox {
+            background-color: rgba(180, 189, 189, 0.911) ; /* Default infobox background color */
+            color: rgb(247, 244, 244) !important
+        }
+
+        .cesium-infoBox-description {
+    color: black !important;
+}
+
+   .cesium-infoBox-description-defaultTable th {
+font-weight: normal;
+padding: 10px;
+vertical-align: middle;
+text-align: center;
+color: black;
+}
+
+.cesium-infoBox-description-defaultTable td {
+padding: 10px;
+vertical-align: middle;
+text-align: center;
+}
+   
+#layerbutton {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      z-index: 100;
+      background: rgb(22, 21, 21);
+      color: white;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      
+    }
+ .layer-list {
+      position: absolute;
+      top: 50px;
+      left: 10px;
+      z-index: 100;
+      background: rgb(22, 21, 21);
+      color: white;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      list-style: none;
+    }
+    .layer-list li {
+      margin-bottom: 5px;
+    }
+    #legend {
+            position: absolute;
+            bottom: 30px;
+            right: 20px;
+            background-color: rgb(255, 255, 255);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            z-index: 200;
+        }
+        #legend img {
+            max-width: 200px;
+        }
+    
+        .button {
+          position: absolute;
+      top: 45px;
+      right: 200px;
+      z-index: 100;
+      background: rgb(6, 3, 103);
+      color: white;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+        }
+
+
+        #sliderContainer {
+            position: absolute;
+            top: 45px;
+            right: 700px;
+            width: 10%;
+            
+            padding: 10px;
+            text-align: center;
+            z-index: 1; /* Ensure the slider is above the Cesium container */
+        }
+
+        
+    #StartRainButton {
+      position: absolute;
+      top: 10px;
+      right: 285px;
+      z-index: 100;
+      background: rgb(6, 3, 103);
+      color: white;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+    }
+    #rain {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 200;
+}
+.RainIntensity {
+    position: absolute;
+    top: 0px;
+    right: 200px;
+    z-index: 300;
+    background: rgb(6, 3, 103);
+    color: white;
+    padding: 1.7px;
+    font-size: 10px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    list-style: none;
+}
+.smallCheckBox {
+            width: 10px;
+            height: 10px;
+            
+        }
+
+.drop {
+    position: absolute;
+    bottom: 100%;
+    width: 1px;
+    height: 100px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.5));
+    animation: fall linear infinite;
+}
+@keyframes fall {
+      to {
+        transform: translateY(100vh);
+      }
+    }
+  </style>
+</head>
+
+<body>
+<header><img src="img\Logo1_Starkregen&Hochwasser.png" height="35" position="center" alt="My Logo">
+  <span> 3D Starkregen/Hochwasser Demo</span>
+ 
+</header>  
+
+
+<div id="cesiumContainer" style="width: 100%; height:95%"></div>
+
+
+<div id="legend">
+  <strong>Wasserhöhen</strong> <br> <br><img id="legendImage" src="" alt="Legend"> 
+ </div>
+<button id="StartRainButton"> Starte Regen Animation </button>
+<ul class="RainIntensity">
+    <li> 
+        <input type="checkbox" id="lightRain" class="smallCheckBox">
+        <label for="lightRain">Leichter Regen</label>
+    </li>
+    <li>
+        <input type="checkbox" id="heavyRain" class="smallCheckBox">
+        <label for="mediumRain">Starker Regen</label>
+    </li>
+</ul>
+<div id= "rain"></div>
+
+<div id="layerbutton">
+  <button style="border-color: transparent; background-color:transparent; color: white;">Layer</button>
+</div>
+<ul class="layer-list" id= "layerlist">
+  <li>
+    3D Gebäude
+  </li>
+  <li>
+    <input type="checkbox" id="OSMCheckbox">
+    <label for="OSMCheckbox">OSM 3D Buildings</label>
+  </li>
+  <li>
+    <input type="checkbox" id="GooglePhotorealisticCheckbox" >  <!-- 'check ed' hier bedeutet ist beim Start an! -->
+    <label for="GooglePhotorealisticCheckbox">GooglePhotorealistic</label>
+  </li>
+  <li>
+    <input type="checkbox" id="LoD2Checkbox" checked>
+    <label for="LoD2Checkbox">LoD2</label>
+  </li>
+  <br>
+  <li>
+     Starkregen
+  </li>
+  <li>
+    <input type="checkbox" id="wmsStarkregenSeltenCheckbox">
+    <label for="wmsStarkregenSeltenCheckbox">WMS Starkregen selten</label>
+  </li>
+  <li>
+    <input type="checkbox" id="wmsStarkregenExtremCheckbox">
+    <label for="wmsStarkregenExtremCheckbox">WMS Starkregen extrem</label>
+  </li>
+  <br>
+  <li>
+    Hochwasser
+  </li>
+  <!--<li>
+    <input type="checkbox" id="wmsHQ10Checkbox">
+    <label for="wmsHQ10Checkbox">WMS HQ10</label>
+  </li>
+  <li>
+    <input type="checkbox" id="wmsHQ100Checkbox">
+    <label for="wmsHQ100Checkbox">WMS HQ100</label>
+  </li>
+  <li>
+    <input type="checkbox" id="wmsHQ500Checkbox">
+    <label for="wmsHQ500Checkbox">WMS HQ500</label>
+  </li>
+  -->
+  <li>
+    
+    <div class="slider-container">
+      <input type="checkbox" id="HochwasserCheckbox">
+      <label for="layerSlider"></label>
+      <input type="range" id="layerSlider" min="0" max="2" value="0">
+      <div class="slider-labels">
+          <span>  &nbsp  &nbsp  &nbsp    </span>
+          <span>HQ10</span>
+          <span>HQ100</span>
+          <span>HQ500</span>
+      </div>
+    
+  </li>
+</ul>
+
+<!-- Script for Cesium Application-->
+  <script type="module">
+    // Your access token can be found at: https://ion.cesium.com/tokens.
+    // This is the default access token from your ion account
+    
+
+    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5MGMxODg4OC1kMzY3LTQ2YWEtOGE3ZC02NTZhMjhlYzMyM2IiLCJpZCI6MjE4NTkzLCJpYXQiOjE3MTY5NjA1Nzl9.g7iklh7XUTw185GhAkjNQVQuJsW13ZAgKAsTQM2_MvI';
+    
+    const imageryProviders = [
+            new Cesium.ProviderViewModel({
+                name: 'OpenStreetMap',
+                iconUrl: Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/openStreetMap.png'),
+                tooltip: 'OpenStreetMap',
+                creationFunction: function() {
+                    return new Cesium.OpenStreetMapImageryProvider({
+                        url : 'https://a.tile.openstreetmap.org/'
+                    });
+                }
+            }),
+            // WMS DOP NRW
+            new Cesium.ProviderViewModel({
+                name: 'DOP NRW',
+                iconUrl: Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/bingAerial.png'),
+                tooltip: 'DOP NRW',
+                creationFunction: function() {
+                    return new Cesium.WebMapServiceImageryProvider({
+                  url: 'https://www.wms.nrw.de/geobasis/wms_nw_dop?',
+                  layers : 'nw_dop_rgb',
+                      parameters : {
+                          service: 'WMS',
+                          version: '1.3.0',
+                          request: 'GetMap',
+                          styles: '',
+                          format: 'image/png', 
+                          srs: 'EPSG:4326' // Use 'srs' for WMS version 1.1.1
+                          }})
+                          }
+            }),
+        ];
+
+    // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
+    const viewer = new Cesium.Viewer('cesiumContainer', {
+        terrainProvider: await Cesium.CesiumTerrainProvider.fromIonAssetId(1)     //Cesium.Terrain.fromAssetId(2599342)  // // Cesium.Terrain.fromWorldTerrain(), for world Terrain
+    ,
+      infoBox: true,
+      selectionIndicator: true,
+      //imageryProvider: false,
+            imageryProviderViewModels: imageryProviders,
+            selectedImageryProviderViewModel: imageryProviders[1], // Select OpenStreetMap as default
+            baseLayerPicker: true, 
+      });
+      
+        // Enable depth testing so things behind the terrain are not visible
+  viewer.scene.globe.depthTestAgainstTerrain = true;
+
+
+
+
+//startView and Fly the camera Cologne at the given longitude, latitude, and height.
+const initialPosition = Cesium.Cartesian3.fromDegrees(6.958, 50.930, 600); // Long, Lat, Height
+const initialOrientation = {
+  heading: Cesium.Math.toRadians(0.0),
+  pitch: Cesium.Math.toRadians(-15.0),
+};
+    viewer.camera.flyTo({
+      destination:initialPosition,
+      orientation: initialOrientation
+    });
+
+    // Configure the home button to fly back to the initial view
+  viewer.homeButton.viewModel.command.beforeExecute.addEventListener(function(commandInfo) {
+  viewer.scene.camera.flyTo({
+    destination: initialPosition,
+    orientation: initialOrientation,
+    duration: 3.0 // Duration in seconds
+  });
+  commandInfo.cancel = true; // Cancel the default home button action
+});
+    
+//Rain Animation
+const rainContainer = document.getElementById('rain');
+const startRainButton = document.getElementById('StartRainButton');
+const lightRainCheckbox = document.getElementById('lightRain');
+const heavyRainCheckbox = document.getElementById('heavyRain');
+
+let isRaining = false;
+let numberOfDrops = 0;
+let speed = 1.2;
+
+startRainButton.addEventListener('click', toggleRain);
+lightRainCheckbox.addEventListener('change', updateRainIntensity);
+heavyRainCheckbox.addEventListener('change', updateRainIntensity);
+ 
+
+function toggleRain() {
+    isRaining = !isRaining;
+
+    if (isRaining) {
+         // Enable light rain by default
+         lightRainCheckbox.checked = true;
+        heavyRainCheckbox.checked = false;
+        updateRainIntensity(); // Update the intensity based on the default light rain
+        startRain();
+        startRainButton.innerText = 'Stop Rain';
+    } else {
+        stopRain();
+        startRainButton.innerText = 'Start Rain';
+    }
+}
+
+function startRain() {
+    rainContainer.innerHTML = ''; // Clear existing drops if any
+    for (let i = 0; i < numberOfDrops; i++) {
+        const drop = document.createElement('div');
+        drop.classList.add('drop');
+        drop.style.left = `${Math.random() * 100}vw`;
+        drop.style.animationDuration = `${(Math.random() * 0.5 + 0.5) * speed}s`;
+        drop.style.animationDelay = `${Math.random() * 2}s`;
+        rainContainer.appendChild(drop);
+        wmsStarkregenSelten.show = true;
+        wmsStarkregenSeltenCheckbox.checked = true;
+          
+    }
+}
+
+function stopRain() {
+    rainContainer.innerHTML = ''; // Clear all drops
+        lightRainCheckbox.checked = false;
+        heavyRainCheckbox.checked = false;
+    if (wmsStarkregenSeltenCheckbox.checked=true) {
+      wmsStarkregenSeltenCheckbox.checked = false, 
+      wmsStarkregenSelten.show = false;
+        }
+    if (wmsStarkregenExtremCheckbox.checked=true) {
+      wmsStarkregenExtremCheckbox.checked = false, 
+      wmsStarkregenExtrem.show = false; }
+}
+function updateRainIntensity() {
+    if (lightRainCheckbox.checked) {
+        numberOfDrops = 250;
+        speed = 1.5; // Slower
+        heavyRainCheckbox.checked = false;// Ensure the other checkbox is unchecked
+        
+        wmsStarkregenSeltenCheckbox.checked = true; 
+        wmsStarkregenSelten.show = true;
+        wmsStarkregenExtremCheckbox.checked = false;
+        wmsStarkregenExtrem.show = false
+    } else if (heavyRainCheckbox.checked) {
+        numberOfDrops = 1000;
+        speed = 0.8; // Faster
+        lightRainCheckbox.checked = false; // Ensure the other checkbox is unchecked
+        wmsStarkregenSeltenCheckbox.checked = false; 
+        wmsStarkregenSelten.show = false;
+        wmsStarkregenExtremCheckbox.checked = true;
+        wmsStarkregenExtrem.show = true
+    } 
+    
+    else {
+        // Default rain intensity if no checkbox is selected
+        numberOfDrops = 0;
+        speed = 1.2;
+    }
+
+    if (isRaining) {
+        startRain(); // Restart the rain with the new intensity
+    }
+}
+
+/*
+//HQExtrem als GEOJSON mit Höhenversatz zur 3D Ansicht
+const resource = await Cesium.IonResource.fromAssetId(2598110);
+const HQextrem3D = await Cesium.GeoJsonDataSource.load(resource, {
+  clampToGround: true,
+});
+
+viewer.dataSources.add(HQextrem3D);
+
+// Iterate through all entities and set extrusion and height.
+var entities = HQextrem3D.entities.values;
+for (var i = 0; i < entities.length; i++) {
+  var entity = entities[i];
+
+  if (Cesium.defined(entity.polygon)) {
+    // Set the base height and extruded height.
+    entity.polygon.height = 105; // Base height in meters.
+    entity.polygon.extrudedHeight = -10; // Extruded height in meters.
+
+    // Optional: Set the material of the polygon.
+    entity.polygon.material = Cesium.Color.BLUE.withAlpha(0.6);
+
+    // Optional: Set the outline color and width.
+    entity.polygon.outline = false;
+    entity.polygon.outlineColor = Cesium.Color.BLACK;
+    entity.polygon.outlineWidth = 2.0;
+  }
+}
+
+// Hide the data source after it has been added and processed
+HQextrem3D.show = false;
+
+ */     
+
+ //Layer Button
+ document.getElementById('layerbutton').addEventListener('click', () => {
+  if (document.getElementById('layerlist').style.display === 'block') {
+  document.getElementById('layerlist').style.display = 'none';
+  } 
+  else  {
+  document.getElementById('layerlist').style.display = 'block';
+  } 
+});
+//Layers
+    // Cesium OSM Buildings
+    const OSMbuildingTileset = await Cesium.createOsmBuildingsAsync();
+    viewer.scene.primitives.add(OSMbuildingTileset);   
+
+    //GooglePhotorealistic Tiles   --> während Entwicklung deaktivieren!!!
+    const GoogletilesetKoeln = await Cesium.Cesium3DTileset.fromIonAssetId(2275207);
+    GoogletilesetKoeln.show = false;
+    viewer.scene.primitives.add(GoogletilesetKoeln);
+    /*GoogletilesetKoeln.style = new Cesium.Cesium3DTileStyle({
+        color: {
+            conditions: [
+                ['true', 'color("white", 0.9)'] // 0.5 is the opacity level
+            ]
+        }
+    });
+    */
+
+    
+
+    //LoD2 Koeln - Styling auch möglich  
+    // von Cesium Ion 
+    const LoD2Koeln = await Cesium.Cesium3DTileset.fromIonAssetId(2601755);
+    viewer.scene.primitives.add(LoD2Koeln);
+   
+
+   // Von lokalen Dateien ??? Irgendwie funktioniert das nicht!? 
+  /* const LoD2Koeln = new Cesium.Cesium3DTileset({
+            url: 'data/3DBuildings/NRW_LoD2/tileset.json'
+        });
+        viewer.scene.primitives.add(LoD2Koeln);
+*/
+      //Hochwasser WMS
+        //HQ10  
+      const wmsHQ10ImageryProvider = new Cesium.WebMapServiceImageryProvider({
+            url : 'https://www.wms.nrw.de/umwelt/HW_Gefahrenkarte?',
+            layers : '15',
+            parameters : {
+                service: 'WMS',
+                version: '1.1.1',
+                request: 'GetMap',
+                styles: '',
+                format: 'image/png',
+                transparent: true
+            }
+        });
+        const wmsHQ10 = viewer.imageryLayers.addImageryProvider(wmsHQ10ImageryProvider);
+        
+
+         //HQ100  
+      const wmsHQ100ImageryProvider = new Cesium.WebMapServiceImageryProvider({
+            url : 'https://www.wms.nrw.de/umwelt/HW_Gefahrenkarte?',
+            layers : '10', 
+            parameters : {
+                service: 'WMS',
+                version: '1.1.1',
+                request: 'GetMap',
+                styles: '',
+                format: 'image/png',
+                transparent: true
+            }
+        });
+       const wmsHQ100 = viewer.imageryLayers.addImageryProvider(wmsHQ100ImageryProvider);
+        
+        //HQ500  
+      const wmsHQ500ImageryProvider = new Cesium.WebMapServiceImageryProvider({
+            url : 'https://www.wms.nrw.de/umwelt/HW_Gefahrenkarte?',
+            layers : '5',
+            parameters : {
+                service: 'WMS',
+                version: '1.1.1',
+                request: 'GetMap',
+                styles: '',
+                format: 'image/png',
+                transparent: true
+            }
+        });
+       const wmsHQ500 = viewer.imageryLayers.addImageryProvider(wmsHQ500ImageryProvider);
+       
+        
+
+
+       //Starkregen WMS  --> unter Hochwasser damit die Layer über Hochwasser liegen
+      //Seltenes Ereignis
+      const wmsStarkregenSeltenImageryProvider = new Cesium.WebMapServiceImageryProvider({
+            url : 'https://sgx.geodatenzentrum.de/wms_starkregen?',
+            layers : 'wasserhoehen_selten',
+            parameters : {
+                service: 'WMS',
+                version: '1.1.1',
+                request: 'GetMap',
+                styles: '',
+                format: 'image/png',
+                transparent: true
+            }
+        });
+        const wmsStarkregenSelten = viewer.imageryLayers.addImageryProvider(wmsStarkregenSeltenImageryProvider);
+
+        //Starkregen Extrem
+      const wmsStarkregenExtremImageryProvider = new Cesium.WebMapServiceImageryProvider({
+            url : 'https://sgx.geodatenzentrum.de/wms_starkregen?',
+            layers : 'wasserhoehen_extrem',
+            parameters : {
+                service: 'WMS',
+                version: '1.1.1',
+                request: 'GetMap',
+                styles: '',
+                format: 'image/png',
+                transparent: true
+            }
+        });
+       const wmsStarkregenExtrem =viewer.imageryLayers.addImageryProvider(wmsStarkregenExtremImageryProvider);
+
+      //GeoJSON Features
+        //Pegel Punkt Feature
+        //var geoJsonUrl = 'data/RheinPegel_Koeln_4326.geojson';
+
+// Load GeoJSON data into the viewer
+        // As Entity
+        const RheinPegel = viewer.entities.add({
+            position: Cesium.Cartesian3.fromDegrees(6.96340097,50.93693404),
+            billboard: {
+                image: 'img/Hochwasser_Pegel.png',
+                scale: 1, 
+                height: 50,
+                width: 35,
+                heightReference: Cesium.HeightReference.CLAMP_TO_GROUND, // Clamps the billboard to the ground
+                verticalOrigin: Cesium.VerticalOrigin.BOTTOM, // Align the bottom of the billboard with the coordinate
+                horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+                disableDepthTestDistance: Number.POSITIVE_INFINITY, // Ensure the billboard is always visible
+                distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0.0, Number.POSITIVE_INFINITY) // Always display the billboard
+                
+            }
+            /*label: {
+                text: 'Rhein Pegel Köln', // The text of the label
+                font: '14pt sans-serif', // The font of the label text
+                fillColor: Cesium.Color.WHITE, // The color of the label text
+                outlineColor: Cesium.Color.BLACK, // The outline color of the label text
+                outlineWidth: 2, // The outline width of the label text
+                style: Cesium.LabelStyle.FILL_AND_OUTLINE, // The style of the label text
+                verticalOrigin: Cesium.VerticalOrigin.BOTTOM, // Align the bottom of the label with the coordinate
+                pixelOffset: new Cesium.Cartesian2(0, -40), // Offset the label to be above the billboard
+                disableDepthTestDistance: Number.POSITIVE_INFINITY, // Ensure the label is always visible
+                distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0.0, Number.POSITIVE_INFINITY) // Always display the label
+  
+            }
+            */
+        })
+        //Set Name and Content für Rheinpegel Box
+        RheinPegel.name= "Rhein Pegel Köln";
+        RheinPegel.description= ` <iframe id="custom-iframe" width="100%" height="555px" src="https://www.pegelonline.wsv.de/charts/OnlineVisualisierungGanglinie?pegeluuid=a6ee8177-107b-47dd-bcfd-30960ccc6e9c" frameborder="0" allowfullscreen></iframe>`;
+          //<p> Weitere Informationen: 
+          //<a href="https://www.pegelonline.wsv.de/gast/pegeltabelle"> Rhein Pegel Köln</a>
+          //</p>
+          //`;
+
+        
+
+/* var rheinPegelDataSource =
+    viewer.dataSources.add(Cesium.GeoJsonDataSource.load(geoJsonUrl, {
+        markerColor: Cesium.Color.BLUE,
+        clampToGround: true,
+        //markerSymbol: 'img/Hochwasser_Pegel.png'
+    }))
+    .then(function (dataSource) {
+        var entities = dataSource.entities.values;
+
+        // Customize each entity's description to include an iframe
+        for (var i = 0; i < entities.length; i++) {
+            var entity = entities[i];
+
+            // You can customize the iframe URL as needed
+            var iframeUrl = 'https://www.pegelonline.wsv.de/charts/OnlineVisualisierungGanglinie?pegeluuid=a6ee8177-107b-47dd-bcfd-30960ccc6e9c';
+
+            // Set the description with the iframe HTML code
+            entity.description = '<iframe width="100%" height="555" src="' + iframeUrl + '" frameborder="0" allowfullscreen></iframe>';
+        }
+    });
+
+// Custom event listener to show the infobox for clicked entities in any layer
+viewer.screenSpaceEventHandler.setInputAction(function onLeftClick(movement) {
+    var pickedObject = viewer.scene.pick(movement.position);
+    if (Cesium.defined(pickedObject) && Cesium.defined(pickedObject.id)) {
+        var entity = pickedObject.id;
+        viewer.selectedEntity = entity;
+    } else {
+        // Deselect if nothing is picked
+        viewer.selectedEntity = undefined;
+    }
+}, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+*/
+        
+        
+    //initial layer configuration
+    OSMbuildingTileset.show = false;
+    //GoogletilesetKoeln.show = true;
+    LoD2Koeln.show = true;
+        // Important for WMS services --> need to be stored as const to be able to use the .show property 
+    wmsStarkregenSelten.show = false; 
+    wmsStarkregenExtrem.show = false;
+    wmsHQ10.show = false;
+    wmsHQ100.show = false;
+    wmsHQ500.show = false;
+    
+    RheinPegel.show = true;
+
+    //Starkregen Wasserflächen KML aus HEC RAS
+       // Load the Cesium.IonResource from the asset ID
+      /* const resource1 = await Cesium.IonResource.fromAssetId(2601695);
+          const KMLHECRAS = await Cesium.KmlDataSource.load(resource1,{
+            clampToGround: true,
+            camera: viewer.scene.camera,
+            canvas: viewer.scene.canvas,
+          });
+          viewer.dataSources.add(KMLHECRAS);
+          
+        
+
+          //Load KML as converted to GeoJSON
+         /* const resource = await Cesium.IonResource.fromAssetId(2592262);
+          const geojsonHECRAS = await Cesium.GeoJsonDataSource.load(resource,{
+            clampToGround: true
+          });
+          viewer.dataSources.add(geojsonHECRAS);
+*/
+    //hide/show layers
+      //OSM
+       document.getElementById('OSMCheckbox').addEventListener('change', () => {
+        OSMbuildingTileset.show = !OSMbuildingTileset.show;
+        });
+
+      //Google Photorealistic
+      document.getElementById('GooglePhotorealisticCheckbox').addEventListener('change', () => {
+        GoogletilesetKoeln.show = !GoogletilesetKoeln.show;
+        });
+
+      //LoD2
+      document.getElementById('LoD2Checkbox').addEventListener('change', () => {
+        LoD2Koeln.show = !LoD2Koeln.show;
+        });
+        
+      //Starkregen WMS
+         //Selten
+      document.getElementById('wmsStarkregenSeltenCheckbox').addEventListener('change', () => {
+        wmsStarkregenSelten.show = !wmsStarkregenSelten.show;
+        });
+      //Extrem
+      document.getElementById('wmsStarkregenExtremCheckbox').addEventListener('change', () => {
+        wmsStarkregenExtrem.show = !wmsStarkregenExtrem.show;
+        });
+
+      //Hochwasser
+      /*  //HQ10
+      document.getElementById('wmsHQ10Checkbox').addEventListener('change', () => {
+        wmsHQ10.show = !wmsHQ10.show;
+        });
+      //HQ100
+      document.getElementById('wmsHQ100Checkbox').addEventListener('change', () => {
+        wmsHQ100.show = !wmsHQ100.show;
+        });
+      //HQ500
+      document.getElementById('wmsHQ500Checkbox').addEventListener('change', () => {
+        wmsHQ500.show = !wmsHQ500.show;
+        });
+*/
+        //Hochwasser mit Slider
+        document.getElementById('layerSlider').addEventListener('change', (event) => {
+          if (layerSlider.value ==='0') {
+            wmsHQ10.show = true;
+            wmsHQ100.show = false;
+            wmsHQ500.show = false;
+            HochwasserCheckbox.checked === true;
+          }
+          else if (layerSlider.value ==='1') {
+            wmsHQ10.show = false;
+            wmsHQ100.show = true;
+            wmsHQ500.show = false;
+            HochwasserCheckbox.checked === true;
+          }
+          else if (layerSlider.value ==='2') {
+            wmsHQ10.show = false;
+            wmsHQ100.show = false;
+            wmsHQ500.show = true;
+            HochwasserCheckbox.checked === true;
+          }
+          
+      });
+        // Checkbox Hochwasser
+       /* document.getElementById('HochwasserCheckbox').addEventListener('change', () => {
+          if (HochwasserCheckbox.checked === true) {
+            wmsHQ10.show = true;
+            layerSlider.value === '0'
+          }
+          else if (HochwasserCheckbox.checked === false) {
+            wmsHQ10.show = false;
+            wmsHQ100.show = false;
+            wmsHQ500.show = false;
+           layerSlider.value === '0'
+          }
+          
+        });
+*/
+        function updateLayers(value) {
+                if (value === '0') {
+                    wmsHQ10.show = true;
+                    wmsHQ100.show = false;
+                    wmsHQ500.show = false;
+                    HochwasserCheckbox.checked = true;
+                } else if (value === '1') {
+                    wmsHQ10.show = false;
+                    wmsHQ100.show = true;
+                    wmsHQ500.show = false;
+                    HochwasserCheckbox.checked = true;
+                } else if (value === '2') {
+                    wmsHQ10.show = false;
+                    wmsHQ100.show = false;
+                    wmsHQ500.show = true;
+                    HochwasserCheckbox.checked = true;
+                }
+            };
+            //updateLayers(layerSlider.value);
+
+            // Event listener for slider input changes
+            layerSlider.addEventListener('input', (event) => {
+                updateLayers(event.target.value);
+            });
+
+            // Event listener for checkbox changes
+            HochwasserCheckbox.addEventListener('change', (event) => {
+                if (HochwasserCheckbox.checked) {
+                    layerSlider.value = '0';
+                    updateLayers('0');
+                }
+                else if (HochwasserCheckbox.checked === false) {
+                    layerSlider.value = '0';
+                    wmsHQ10.show = false;
+                    wmsHQ100.show = false;
+                    wmsHQ500.show = false;
+                }
+            });
+
+            //Wasserhöhen Legende
+        const legendUrl = 'data:image/png;base64,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';
+        document.getElementById('legendImage').src = legendUrl;
+
+</script>
+</body>
+</html>
+        
+    
+  </script>
+
+</body>
+
+</html>
