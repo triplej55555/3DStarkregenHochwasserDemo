@@ -19,7 +19,7 @@
         padding: 0;
         overflow: hidden;
         height: 100vh;
-        display: block;
+        display: none;
     }
     header{
       display: flex;
@@ -31,7 +31,7 @@
       border: 0 solid black;
       color: white;
       font-size: 25px;
-      height: 5%;
+      height: 50px;
     }
     header img {
       margin-right: 10px; /* Adjust the value to control the space between the image and the text */
@@ -186,6 +186,20 @@ text-align: center;
 </head>
 
 <body>
+  <!-- Password Protection-->
+  <script>
+    // Prompt the user for a password
+    var password = prompt("Enter the password:");
+
+    // Check if the entered password matches
+    if (password !== "GEODVHochwasser5!") {
+      alert("Incorrect password!");
+        document.body.innerHTML = "Unauthorized Access!";
+    } else {
+        // If the password is correct, show the content
+        document.body.style.display = "block";
+    }
+</script>
 <header><img src="img\Logo1_Starkregen&Hochwasser.png" height="35" position="center" alt="My Logo">
   <span> 3D Starkregen/Hochwasser Demo</span>
  
