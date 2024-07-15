@@ -69,23 +69,25 @@ text-align: center;
       top: 6px;
       left: 5px;
       z-index: 100;
-      background: black;
-      color: white;
+      background: white;
+      color: black;
       padding: 10px;
       border: 1px solid #ccc;
       border-radius: 10px;
+      font-family: Arial, Helvetica, sans-serif;
       
     }
     #legendbutton {
   position: absolute;
       top: 6px;
-      left: 62px;
+      left: 65px;
       z-index: 100;
-      background: black;
-      color: white;
+      background: white;
+      color: black;
       padding: 10px;
       border: 1px solid #ccc;
       border-radius: 10px;
+      font-family: Arial, Helvetica, sans-serif;
       
     }
  .layer-list {
@@ -93,26 +95,30 @@ text-align: center;
       top: 50px;
       left: 10px;
       z-index: 100;
-      background: rgb(22, 21, 21);
-      color: white;
+      background: white;
+      color: black;
       padding: 10px;
       border: 1px solid #ccc;
-      border-radius: 20px;
+      border-radius: 10px;
       list-style: none;
+      font-family: Arial, Helvetica, sans-serif;
     }
     .layer-list li {
       margin-bottom: 5px;
     }
     #legend {
             position: absolute;
-            bottom: 30px;
-            right: 20px;
+            bottom: 240px;
+            left: 40px;
             background-color: rgb(255, 255, 255);
             padding: 10px;
-            border-radius: 8px;
+            border-radius: 10px;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
             z-index: 200;
             display: none;
+            font-family: Arial, Helvetica, sans-serif;
+            text-align: center;
+            align-items: center;
         }
         #legend img {
             max-width: 200px;
@@ -146,13 +152,14 @@ text-align: center;
     #StartRainButton {
       position: absolute;
       top: 6px;
-      right: 93px;
+      right: 112px;
       z-index: 100;
       background: rgb(6, 3, 103);
       color: white;
       padding: 10px;
       border: 1px solid #ccc;
       border-radius: 10px;
+      font-family: Arial, Helvetica, sans-serif;
     }
     #rain {
     position: absolute;
@@ -175,6 +182,8 @@ text-align: center;
     border: 1px solid #ccc;
     border-radius: 10px;
     list-style: none;
+    font-family: Arial, Helvetica, sans-serif;
+    width: 100px;
 }
 .smallCheckBox {
             width: 10px;
@@ -210,17 +219,17 @@ text-align: center;
 <div id="legend">
   <strong>Wasserhöhen</strong> <br> <br><img id="legendImage" src="" alt="Legend"> 
  </div>
-<button id="StartRainButton"> Starte Regen Animation </button>
-<button id="layerbutton" >Layer</button>
-<button id="legendbutton">Legende</button>
+<button id="StartRainButton"> <strong>Starte Regen Animation</strong> </button>
+<button id="layerbutton" ><strong>Layer</strong></button>
+<button id="legendbutton"><strong>Legende</strong></button>
 <ul class="RainIntensity">
     <li> 
         <input type="checkbox" id="lightRain" class="smallCheckBox">
-        <label for="lightRain">Leichter Regen</label>
+        <label for="lightRain"><strong>Leichter Regen</strong></label>
     </li>
     <li>
         <input type="checkbox" id="heavyRain" class="smallCheckBox">
-        <label for="mediumRain">Starker Regen</label>
+        <label for="mediumRain"><strong>Starker Regen</strong></label>
     </li>
 </ul>
 <div id= "rain"></div>
@@ -230,7 +239,7 @@ text-align: center;
 
 <ul class="layer-list" id= "layerlist">
   <li>
-    3D Gebäude
+    <strong>3D Gebäude</strong>
   </li>
   <li>
     <input type="checkbox" id="OSMCheckbox">
@@ -246,7 +255,7 @@ text-align: center;
   </li>
   <br>
   <li>
-     Starkregen
+    <strong> Starkregen</strong>
   </li>
   <li>
     <input type="checkbox" id="wmsStarkregenSeltenCheckbox">
@@ -258,7 +267,7 @@ text-align: center;
   </li>
   <br>
   <li>
-    Hochwasser
+   <strong> Hochwasser</strong>
   </li>
   <!--<li>
     <input type="checkbox" id="wmsHQ10Checkbox">
@@ -379,8 +388,20 @@ let numberOfDrops = 0;
 let speed = 1.2;
 
 startRainButton.addEventListener('click', toggleRain);
-lightRainCheckbox.addEventListener('change', updateRainIntensity);
-heavyRainCheckbox.addEventListener('change', updateRainIntensity);
+// Event listeners to ensure mutual exclusivity
+lightRainCheckbox.addEventListener('change', () => {
+    if (lightRainCheckbox.checked) {
+        heavyRainCheckbox.checked = false;
+    }
+    updateRainIntensity();
+});
+
+heavyRainCheckbox.addEventListener('change', () => {
+    if (heavyRainCheckbox.checked) {
+        lightRainCheckbox.checked = false;
+    }
+    updateRainIntensity();
+});
  
 
 function toggleRain() {
