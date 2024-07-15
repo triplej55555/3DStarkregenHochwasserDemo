@@ -492,6 +492,7 @@ HQextrem3D.show = false;
  */     
 
  //Layer Button
+ document.getElementById('layerlist').style.display = 'block';
  document.getElementById('layerbutton').addEventListener('click', () => {
   if (document.getElementById('layerlist').style.display === 'block') {
   document.getElementById('layerlist').style.display = 'none';
@@ -502,6 +503,7 @@ HQextrem3D.show = false;
 });
 
 //Legend Button
+document.getElementById('legend').style.display = 'none';
 document.getElementById('legendbutton').addEventListener('click', () => {
   if (document.getElementById('legend').style.display === 'none') {
   document.getElementById('legend').style.display = 'block';
