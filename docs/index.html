@@ -19,7 +19,7 @@
         padding: 0;
         overflow: hidden;
         height: 100vh;
-        display: none;
+        display: block;
     }
     header{
       display: flex;
@@ -65,15 +65,27 @@ text-align: center;
 }
    
 #layerbutton {
-      position: absolute;
-      top: 5px;
+  position: absolute;
+      top: 6px;
       left: 5px;
       z-index: 100;
-      background: rgb(22, 21, 21);
+      background: black;
       color: white;
       padding: 10px;
       border: 1px solid #ccc;
-      border-radius: 20px;
+      border-radius: 10px;
+      
+    }
+    #legendbutton {
+  position: absolute;
+      top: 6px;
+      left: 62px;
+      z-index: 100;
+      background: black;
+      color: white;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
       
     }
  .layer-list {
@@ -100,6 +112,7 @@ text-align: center;
             border-radius: 8px;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
             z-index: 200;
+            display: none;
         }
         #legend img {
             max-width: 200px;
@@ -132,8 +145,8 @@ text-align: center;
         
     #StartRainButton {
       position: absolute;
-      top: 10px;
-      right: 285px;
+      top: 6px;
+      right: 93px;
       z-index: 100;
       background: rgb(6, 3, 103);
       color: white;
@@ -152,8 +165,8 @@ text-align: center;
 }
 .RainIntensity {
     position: absolute;
-    top: 0px;
-    right: 200px;
+    top: -4px;
+    right: 5px;
     z-index: 300;
     background: rgb(6, 3, 103);
     color: white;
@@ -186,23 +199,8 @@ text-align: center;
 </head>
 
 <body>
-  <!-- Password Protection-->
-  <script>
-    // Prompt the user for a password
-    var password = prompt("Enter the password:");
-
-    // Check if the entered password matches
-    if (password !== "GEODV5!") {
-      alert("Incorrect password!");
-        document.body.innerHTML = "Unauthorized Access!";
-    } else {
-        // If the password is correct, show the content
-        document.body.style.display = "block";
-    }
-</script>
 <header><img src="img\Logo1_Starkregen&Hochwasser.png" height="35" position="center" alt="My Logo">
-  <span> 3D Starkregen/Hochwasser Demo</span>
- 
+  <span> 3D Starkregen/Hochwasser Demo</span> 
 </header>  
 
 
@@ -213,6 +211,8 @@ text-align: center;
   <strong>Wasserhöhen</strong> <br> <br><img id="legendImage" src="" alt="Legend"> 
  </div>
 <button id="StartRainButton"> Starte Regen Animation </button>
+<button id="layerbutton" >Layer</button>
+<button id="legendbutton">Legende</button>
 <ul class="RainIntensity">
     <li> 
         <input type="checkbox" id="lightRain" class="smallCheckBox">
@@ -225,9 +225,9 @@ text-align: center;
 </ul>
 <div id= "rain"></div>
 
-<div id="layerbutton">
-  <button style="border-color: transparent; background-color:transparent; color: white;">Layer</button>
-</div>
+
+
+
 <ul class="layer-list" id= "layerlist">
   <li>
     3D Gebäude
@@ -498,6 +498,16 @@ HQextrem3D.show = false;
   } 
   else  {
   document.getElementById('layerlist').style.display = 'block';
+  } 
+});
+
+//Legend Button
+document.getElementById('legendbutton').addEventListener('click', () => {
+  if (document.getElementById('legend').style.display === 'none') {
+  document.getElementById('legend').style.display = 'block';
+  } 
+  else  {
+  document.getElementById('legend').style.display = 'none';
   } 
 });
 //Layers
