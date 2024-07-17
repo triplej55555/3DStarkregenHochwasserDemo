@@ -11,6 +11,7 @@
   <script src="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Cesium.js"></script>
 
   <link href="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   
   <style>
     
@@ -18,11 +19,18 @@
         margin: 0;
         padding: 0;
         overflow: hidden;
-        height: 100vh;
-        display: block;
+        height: 100%;
+        display: none;
     }
-    header{
+    #cesiumContainer {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        
+    }
+    #header{
       display: flex;
+      position: absolute;
       align-items: center;
       text-align: center;
       justify-content: center;
@@ -32,43 +40,45 @@
       color: white;
       font-size: 25px;
       height: 50px;
+      width: 100%;
+      z-index: 1000;
     }
-    header img {
+    #header img {
       margin-right: 10px; /* Adjust the value to control the space between the image and the text */
     }
 
-    header span {
+    #header span {
       display: inline-block;
     } 
+    .cesium-viewer-toolbar {
+      position: absolute;
+      top: 5px;
+      right: 48px;
+      z-index: 1000;
+    }
     /* General styles for all infoboxes */
     .cesium-infoBox {
             background-color: rgba(180, 189, 189, 0.911) ; /* Default infobox background color */
             color: rgb(247, 244, 244) !important
         }
 
-        .cesium-infoBox-description {
-    color: black !important;
-}
 
-   .cesium-infoBox-description-defaultTable th {
-font-weight: normal;
-padding: 10px;
-vertical-align: middle;
-text-align: center;
-color: black;
-}
-
-.cesium-infoBox-description-defaultTable td {
-padding: 10px;
-vertical-align: middle;
-text-align: center;
-}
-   
-#layerbutton {
+.button-container {
+  display: flex;
   position: absolute;
-      top: 6px;
-      left: 5px;
-      z-index: 100;
+  justify-content: center;
+  height:  50px;
+  gap: 5px;
+  top: 6px;
+  left: 10px;
+  z-index: 1000;
+}
+.btn {
+  height: 35px;
+}
+#layerbutton {
+        
+      z-index: 1000;
       background: white;
       color: black;
       padding: 10px;
@@ -78,10 +88,7 @@ text-align: center;
       
     }
     #legendbutton {
-  position: absolute;
-      top: 6px;
-      left: 65px;
-      z-index: 100;
+  
       background: white;
       color: black;
       padding: 10px;
@@ -90,11 +97,27 @@ text-align: center;
       font-family: Arial, Helvetica, sans-serif;
       
     }
+    #zweid3dButton {
+      position: absolute;
+      top: 7px;
+      right: 5px;
+      height: 32px;
+      z-index: 1000;
+      background: #323436da;
+      color: white;
+      padding: 2px;
+      border: 0px solid #ccc;
+      border-radius: 0px;
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: bold;
+      align-content: center;
+      
+    }
  .layer-list {
+      display: block;  
       position: absolute;
       top: 50px;
       left: 10px;
-      z-index: 100;
       background: white;
       color: black;
       padding: 10px;
@@ -102,14 +125,15 @@ text-align: center;
       border-radius: 10px;
       list-style: none;
       font-family: Arial, Helvetica, sans-serif;
+      z-index: 10000;
     }
     .layer-list li {
       margin-bottom: 5px;
     }
     #legend {
             position: absolute;
-            bottom: 240px;
-            left: 40px;
+            top: 68px;
+            left: 250px;
             background-color: rgb(255, 255, 255);
             padding: 10px;
             border-radius: 10px;
@@ -124,25 +148,11 @@ text-align: center;
             max-width: 200px;
         }
     
-        .button {
-          position: absolute;
-      top: 45px;
-      right: 200px;
-      z-index: 100;
-      background: rgb(6, 3, 103);
-      color: white;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-        }
-
-
         #sliderContainer {
             position: absolute;
             top: 45px;
             right: 700px;
             width: 10%;
-            
             padding: 10px;
             text-align: center;
             z-index: 1; /* Ensure the slider is above the Cesium container */
@@ -150,16 +160,25 @@ text-align: center;
 
         
     #StartRainButton {
-      position: absolute;
-      top: 6px;
-      right: 112px;
-      z-index: 100;
-      background: rgb(6, 3, 103);
-      color: white;
+      
+      background: white;
+      color: black;
       padding: 10px;
       border: 1px solid #ccc;
       border-radius: 10px;
       font-family: Arial, Helvetica, sans-serif;
+      width: 30px;
+    }
+    #StopRainButton {
+      
+      background: white;
+      color: black;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-family: Arial, Helvetica, sans-serif;
+      width: 30px;
+      display: none;
     }
     #rain {
     position: absolute;
@@ -170,20 +189,31 @@ text-align: center;
     pointer-events: none;
     z-index: 200;
 }
-.RainIntensity {
-    position: absolute;
-    top: -4px;
-    right: 5px;
-    z-index: 300;
-    background: rgb(6, 3, 103);
-    color: white;
-    padding: 1.7px;
+.RainIntensity {  
+    height: 33px;
+    background: white;
+    color: black;
+    padding: 0px;
     font-size: 10px;
     border: 1px solid #ccc;
     border-radius: 10px;
     list-style: none;
     font-family: Arial, Helvetica, sans-serif;
-    width: 100px;
+    width: 110px;
+    margin-top: 1px;
+    
+}
+
+.RainIntensity li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0px;
+    margin-left: 5px;
+    margin-top: 1px;
+}
+
+.RainIntensity input[type="checkbox"] {
+    margin-right: 10px;
 }
 .smallCheckBox {
             width: 10px;
@@ -208,34 +238,39 @@ text-align: center;
 </head>
 
 <body>
-<header><img src="img\Logo1_Starkregen&Hochwasser.png" height="35" position="center" alt="My Logo">
-  <span> 3D Starkregen/Hochwasser Demo</span> 
-</header>  
+<script src="./pwd/pwd.js"></script>
 
-
-<div id="cesiumContainer" style="width: 100%; height:95%"></div>
-
-
+  
+<div id="cesiumContainer">
+  <div id= "header"><img src="img\Logo1_Starkregen&Hochwasser.png" height="35" position="center" alt="My Logo">
+    <span> 3D Starkregen/Hochwasser Demo</span> 
+    <div class="button-container">
+      <button class= "btn" id="layerbutton" ><strong>Layer</strong></button>
+      <button class= "btn" id="legendbutton"><strong>Legende</strong></button>
+      <button class= "btn" id="StartRainButton"> <i class="fa fa-play-circle" style="font-size:24px;color:green; position: relative;top: -5px; left: -6px; display: block;"></i> </button>
+      <button class= "btn" id="StopRainButton"> <i class="fa fa-pause-circle" style="font-size:24px;color:red; position: relative;top: -5px; left: -6px; display: block;"></i> </button>
+      <ul class="RainIntensity" >
+        <li> 
+            <input type="checkbox" id="lightRain" class="smallCheckBox">
+            <label for="lightRain"><strong>Leichter Regen</strong></label>
+        </li>
+        <li>
+            <input type="checkbox" id="heavyRain" class="smallCheckBox">
+            <label for="mediumRain"><strong>Starker Regen</strong></label>
+        </li>
+      </ul>
+      </div>
+  </div>
+</div>
+<button id="zweid3dButton">2D/3D</button>
 <div id="legend">
   <strong>Wasserhöhen</strong> <br> <br><img id="legendImage" src="" alt="Legend"> 
  </div>
-<button id="StartRainButton"> <strong>Start Rain</strong> </button>
-<button id="layerbutton" ><strong>Layer</strong></button>
-<button id="legendbutton"><strong>Legende</strong></button>
-<ul class="RainIntensity">
-    <li> 
-        <input type="checkbox" id="lightRain" class="smallCheckBox">
-        <label for="lightRain"><strong>Leichter Regen</strong></label>
-    </li>
-    <li>
-        <input type="checkbox" id="heavyRain" class="smallCheckBox">
-        <label for="mediumRain"><strong>Starker Regen</strong></label>
-    </li>
-</ul>
+
+ 
+
+
 <div id= "rain"></div>
-
-
-
 
 <ul class="layer-list" id= "layerlist">
   <li>
@@ -269,19 +304,10 @@ text-align: center;
   <li>
    <strong> Hochwasser</strong>
   </li>
-  <!--<li>
-    <input type="checkbox" id="wmsHQ10Checkbox">
-    <label for="wmsHQ10Checkbox">WMS HQ10</label>
-  </li>
   <li>
-    <input type="checkbox" id="wmsHQ100Checkbox">
-    <label for="wmsHQ100Checkbox">WMS HQ100</label>
+    <input type="checkbox" id="RheinPegelCheckbox" checked>
+    <label for="RheinPegelCheckbox">Rheinpegel</label>
   </li>
-  <li>
-    <input type="checkbox" id="wmsHQ500Checkbox">
-    <label for="wmsHQ500Checkbox">WMS HQ500</label>
-  </li>
-  -->
   <li>
     
     <div class="slider-container">
@@ -294,9 +320,9 @@ text-align: center;
           <span>HQ100</span>
           <span>HQ500</span>
       </div>
-    
-  </li>
+    </li>
 </ul>
+ 
 
 <!-- Script for Cesium Application-->
   <script type="module">
@@ -336,14 +362,37 @@ text-align: center;
                           }})
                           }
             }),
+            //Top Plus Open Grau
+            new Cesium.ProviderViewModel({
+                name: 'TopPlus Grau',
+                iconUrl: Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/bingRoads.png'),
+                tooltip: 'TopPlus Grau',
+                creationFunction: function() {
+                    return new Cesium.WebMapServiceImageryProvider({
+                  url: 'https://sgx.geodatenzentrum.de/wms_topplus_open?',
+                  layers : 'web_grau',
+                      parameters : {
+                          service: 'WMS',
+                          version: '1.3.0',
+                          request: 'GetMap',
+                          styles: '',
+                          format: 'image/png', 
+                          srs: 'EPSG:4326' // Use 'srs' for WMS version 1.1.1
+                          }})
+                          }
+            }),
         ];
 
     // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
     const viewer = new Cesium.Viewer('cesiumContainer', {
         terrainProvider: await Cesium.CesiumTerrainProvider.fromIonAssetId(1)     //Cesium.Terrain.fromAssetId(2599342)  // // Cesium.Terrain.fromWorldTerrain(), for world Terrain
     ,
+    navigationHelpButton: false,
+    animation: false,
+    timeline: false,
       infoBox: true,
       selectionIndicator: true,
+      sceneModePicker: false, // change back when it works
       //imageryProvider: false,
             imageryProviderViewModels: imageryProviders,
             selectedImageryProviderViewModel: imageryProviders[1], // Select OpenStreetMap as default
@@ -352,8 +401,6 @@ text-align: center;
       
         // Enable depth testing so things behind the terrain are not visible
   viewer.scene.globe.depthTestAgainstTerrain = true;
-
-
 
 
 //startView and Fly the camera Cologne at the given longitude, latitude, and height.
@@ -377,9 +424,84 @@ const initialOrientation = {
   commandInfo.cancel = true; // Cancel the default home button action
 });
     
+
+//2D/3D Button  
+//Function to switch 
+function toggleView(pitchInDegrees, latitudeOffset, heightOffset) {
+    var scene = viewer.scene;
+    var camera = scene.camera;
+
+    // Get the current camera position in Cartographic coordinates
+  const currentPosition = viewer.camera.positionCartographic.clone();
+
+// Calculate the new latitude with the offset
+const newLatitude = currentPosition.latitude + Cesium.Math.toRadians(latitudeOffset);
+
+// Calculate the new height with the offset
+const newHeight = heightOffset;
+
+// Create the new position with the updated latitude and height
+const newPosition = Cesium.Cartesian3.fromRadians(
+  currentPosition.longitude,
+  newLatitude,
+  newHeight
+);
+// Get the current heading of the camera
+const currentHeading = viewer.camera.heading;
+// Define the new orientation
+const newOrientation = {
+    heading: currentHeading,
+    pitch: Cesium.Math.toRadians(pitchInDegrees)
+  };
+  viewer.camera.flyTo({
+    //destination: initialPosition,
+    //orientation: initialOrientation,
+    destination: newPosition,
+  orientation: newOrientation,
+    duration: 1.0
+  })
+};
+
+   /* function setCamera() {
+      var scene = viewer.scene;
+        if (scene.mode === Cesium.SceneMode.SCENE2D) {
+            // In 2D mode, set the camera to look directly down
+            
+            toggleView(-15, -0.01, 600);
+        } else {
+            // In 3D mode, restore the previous position and orientation
+            
+            toggleView(-90, 0.01, 1200);
+        }
+    
+
+    // Switch the scene mode
+    if (scene.mode === Cesium.SceneMode.SCENE3D) {
+      toggleView(-90, 0.01, 1200); // Morph to 2D over 1 second
+    } else {
+      toggleView(-15, -0.01, 600); // Morph to 3D over 1 second
+    }
+
+}
+*/
+let toggleState= false
+// Button Functionality
+document.getElementById('zweid3dButton').addEventListener('click', () => {
+  if (toggleState) {
+        // Call the function with the first set of parameters
+        toggleView(-15, -0.01, 600);
+    } else {
+        // Call the function with the second set of parameters
+        toggleView(-90, 0.01, 1200);
+    }
+    // Toggle the state
+    toggleState = !toggleState;
+});
+
 //Rain Animation
 const rainContainer = document.getElementById('rain');
 const startRainButton = document.getElementById('StartRainButton');
+const stopRainButton = document.getElementById('StopRainButton');
 const lightRainCheckbox = document.getElementById('lightRain');
 const heavyRainCheckbox = document.getElementById('heavyRain');
 
@@ -413,15 +535,20 @@ function toggleRain() {
         heavyRainCheckbox.checked = false;
         updateRainIntensity(); // Update the intensity based on the default light rain
         startRain();
-        startRainButton.innerText = 'Stop Rain';
+        
+        //startRainButton.innerHTML = 'Stop Rain';
     } else {
         stopRain();
-        startRainButton.innerText = 'Start Rain';
+        //startRainButton.innerText = 'Start Rain';
+        
     }
+    updateButtonState();
 }
 
 function startRain() {
-    rainContainer.innerHTML = ''; // Clear existing drops if any
+  rainContainer.innerHTML = ''; // Clear existing drops if any
+  document.getElementById('StartRainButton').style.display = 'none';
+  document.getElementById('StopRainButton').style.display = 'block';
     for (let i = 0; i < numberOfDrops; i++) {
         const drop = document.createElement('div');
         drop.classList.add('drop');
@@ -431,21 +558,33 @@ function startRain() {
         rainContainer.appendChild(drop);
         wmsStarkregenSelten.show = true;
         wmsStarkregenSeltenCheckbox.checked = true;
+        document.getElementById('StartRainButton').style.display = 'none';
+        document.getElementById('StopRainButton').style.display = 'block';
           
     }
 }
 
 function stopRain() {
+  
     rainContainer.innerHTML = ''; // Clear all drops
         lightRainCheckbox.checked = false;
         heavyRainCheckbox.checked = false;
+        document.getElementById('StartRainButton').style.display = 'block';
+        document.getElementById('StopRainButton').style.display = 'none';
     if (wmsStarkregenSeltenCheckbox.checked=true) {
       wmsStarkregenSeltenCheckbox.checked = false, 
       wmsStarkregenSelten.show = false;
+      document.getElementById('StartRainButton').style.display = 'block';
+      document.getElementById('StopRainButton').style.display = 'none';
         }
     if (wmsStarkregenExtremCheckbox.checked=true) {
       wmsStarkregenExtremCheckbox.checked = false, 
-      wmsStarkregenExtrem.show = false; }
+      wmsStarkregenExtrem.show = false; 
+      document.getElementById('StartRainButton').style.display = 'block';
+      document.getElementById('StopRainButton').style.display = 'none';
+    }
+    document.getElementById('StartRainButton').style.display = 'block';
+    document.getElementById('StopRainButton').style.display = 'none';
 }
 function updateRainIntensity() {
     if (lightRainCheckbox.checked) {
@@ -471,46 +610,34 @@ function updateRainIntensity() {
         // Default rain intensity if no checkbox is selected
         numberOfDrops = 0;
         speed = 1.2;
+        startRainButton.style.display = 'block';
+        stopRainButton.style.display = 'none';
+        stopRain();
+        
     }
 
     if (isRaining) {
+        
         startRain(); // Restart the rain with the new intensity
     }
 }
-
-/*
-//HQExtrem als GEOJSON mit Höhenversatz zur 3D Ansicht
-const resource = await Cesium.IonResource.fromAssetId(2598110);
-const HQextrem3D = await Cesium.GeoJsonDataSource.load(resource, {
-  clampToGround: true,
-});
-
-viewer.dataSources.add(HQextrem3D);
-
-// Iterate through all entities and set extrusion and height.
-var entities = HQextrem3D.entities.values;
-for (var i = 0; i < entities.length; i++) {
-  var entity = entities[i];
-
-  if (Cesium.defined(entity.polygon)) {
-    // Set the base height and extruded height.
-    entity.polygon.height = 105; // Base height in meters.
-    entity.polygon.extrudedHeight = -10; // Extruded height in meters.
-
-    // Optional: Set the material of the polygon.
-    entity.polygon.material = Cesium.Color.BLUE.withAlpha(0.6);
-
-    // Optional: Set the outline color and width.
-    entity.polygon.outline = false;
-    entity.polygon.outlineColor = Cesium.Color.BLACK;
-    entity.polygon.outlineWidth = 2.0;
-  }
+function updateButtonState() {
+    if (isRaining) {
+        startRainButton.style.display = 'none';
+        stopRainButton.style.display = 'block';
+    } else if (!isRaining) {
+        startRainButton.style.display = 'block';
+        stopRainButton.style.display = 'none';
+    }
 }
 
-// Hide the data source after it has been added and processed
-HQextrem3D.show = false;
-
- */     
+//Stop Rain Button Functionality
+document.getElementById('StopRainButton').addEventListener('click', () => {
+    stopRain();
+    document.getElementById('StartRainButton').style.display = 'block';
+    document.getElementById('StopRainButton').style.display = 'none';
+})
+   
 
  //Layer Button
  document.getElementById('layerlist').style.display = 'block';
@@ -689,43 +816,7 @@ document.getElementById('legendbutton').addEventListener('click', () => {
           //</p>
           //`;
 
-        
-
-/* var rheinPegelDataSource =
-    viewer.dataSources.add(Cesium.GeoJsonDataSource.load(geoJsonUrl, {
-        markerColor: Cesium.Color.BLUE,
-        clampToGround: true,
-        //markerSymbol: 'img/Hochwasser_Pegel.png'
-    }))
-    .then(function (dataSource) {
-        var entities = dataSource.entities.values;
-
-        // Customize each entity's description to include an iframe
-        for (var i = 0; i < entities.length; i++) {
-            var entity = entities[i];
-
-            // You can customize the iframe URL as needed
-            var iframeUrl = 'https://www.pegelonline.wsv.de/charts/OnlineVisualisierungGanglinie?pegeluuid=a6ee8177-107b-47dd-bcfd-30960ccc6e9c';
-
-            // Set the description with the iframe HTML code
-            entity.description = '<iframe width="100%" height="555" src="' + iframeUrl + '" frameborder="0" allowfullscreen></iframe>';
-        }
-    });
-
-// Custom event listener to show the infobox for clicked entities in any layer
-viewer.screenSpaceEventHandler.setInputAction(function onLeftClick(movement) {
-    var pickedObject = viewer.scene.pick(movement.position);
-    if (Cesium.defined(pickedObject) && Cesium.defined(pickedObject.id)) {
-        var entity = pickedObject.id;
-        viewer.selectedEntity = entity;
-    } else {
-        // Deselect if nothing is picked
-        viewer.selectedEntity = undefined;
-    }
-}, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-
-*/
-        
+               
         
     //initial layer configuration
     OSMbuildingTileset.show = false;
@@ -785,20 +876,11 @@ viewer.screenSpaceEventHandler.setInputAction(function onLeftClick(movement) {
         wmsStarkregenExtrem.show = !wmsStarkregenExtrem.show;
         });
 
-      //Hochwasser
-      /*  //HQ10
-      document.getElementById('wmsHQ10Checkbox').addEventListener('change', () => {
-        wmsHQ10.show = !wmsHQ10.show;
+   //Rheinpegel
+   document.getElementById('RheinPegelCheckbox').addEventListener('change', () => {
+        RheinPegel.show = !RheinPegel.show;
         });
-      //HQ100
-      document.getElementById('wmsHQ100Checkbox').addEventListener('change', () => {
-        wmsHQ100.show = !wmsHQ100.show;
-        });
-      //HQ500
-      document.getElementById('wmsHQ500Checkbox').addEventListener('change', () => {
-        wmsHQ500.show = !wmsHQ500.show;
-        });
-*/
+
         //Hochwasser mit Slider
         document.getElementById('layerSlider').addEventListener('change', (event) => {
           if (layerSlider.value ==='0') {
@@ -821,21 +903,7 @@ viewer.screenSpaceEventHandler.setInputAction(function onLeftClick(movement) {
           }
           
       });
-        // Checkbox Hochwasser
-       /* document.getElementById('HochwasserCheckbox').addEventListener('change', () => {
-          if (HochwasserCheckbox.checked === true) {
-            wmsHQ10.show = true;
-            layerSlider.value === '0'
-          }
-          else if (HochwasserCheckbox.checked === false) {
-            wmsHQ10.show = false;
-            wmsHQ100.show = false;
-            wmsHQ500.show = false;
-           layerSlider.value === '0'
-          }
-          
-        });
-*/
+     
         function updateLayers(value) {
                 if (value === '0') {
                     wmsHQ10.show = true;
