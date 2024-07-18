@@ -20,7 +20,7 @@
         padding: 0;
         overflow: hidden;
         height: 100%;
-        display: none;
+        display: block;
     }
     #cesiumContainer {
         position: absolute;
@@ -97,6 +97,17 @@
       font-family: Arial, Helvetica, sans-serif;
       
     }
+    #counterButton {
+        
+        z-index: 1000;
+        background: white;
+        color: black;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        font-family: Arial, Helvetica, sans-serif;
+        
+      }
     #zweid3dButton {
       position: absolute;
       top: 7px;
@@ -115,6 +126,7 @@
     #zweid3dButton:hover {
   background: #4488bb; /* Change background color on hover */
   border: white solid 1px;
+  border-radius: 5px;
   color: #fff;      /* Change text color on hover */
 }
 
@@ -168,21 +180,25 @@
       
       background: white;
       color: black;
-      padding: 10px;
+      padding: 1px;
       border: 1px solid #ccc;
       border-radius: 10px;
       font-family: Arial, Helvetica, sans-serif;
-      width: 30px;
+      width: fit-content;
+      display: inline-block;
+      align-content: center;
+      justify-content: center;
+      align-items: center;
     }
     #StopRainButton {
       
       background: white;
       color: black;
-      padding: 10px;
+      padding: 1px;
       border: 1px solid #ccc;
       border-radius: 10px;
       font-family: Arial, Helvetica, sans-serif;
-      width: 30px;
+      width: fit-content;
       display: none;
     }
     #rain {
@@ -207,6 +223,10 @@
     width: 110px;
     margin-top: 1px;
     
+    
+}
+#RainIntensity {
+  display: none;
 }
 
 .RainIntensity li {
@@ -220,6 +240,19 @@
 .RainIntensity input[type="checkbox"] {
     margin-right: 10px;
 }
+
+#FavoritenAuswahlButton {
+  background: white;
+      color: black;
+      padding: 1px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-family: Arial, Helvetica, sans-serif;
+      width: fit-content;
+      align-items: center;
+      justify-content: center;
+      align-content: center;
+        }
 .smallCheckBox {
             width: 10px;
             height: 10px;
@@ -252,9 +285,9 @@
     <div class="button-container">
       <button class= "btn" id="layerbutton" ><strong>Layer</strong></button>
       <button class= "btn" id="legendbutton"><strong>Legende</strong></button>
-      <button class= "btn" id="StartRainButton"> <i class="fa fa-play-circle" style="font-size:24px;color:green; position: relative;top: -5px; left: -6px; display: block;"></i> </button>
-      <button class= "btn" id="StopRainButton"> <i class="fa fa-pause-circle" style="font-size:24px;color:red; position: relative;top: -5px; left: -6px; display: block;"></i> </button>
-      <ul class="RainIntensity" >
+      <button class= "btn" id="StartRainButton"> <i class="fa fa-tint" aria-hidden="true" style="font-size: 24px; color: blue; position: relative;top: 2px; left: 0px; display: inline-block; margin-right: 5px; margin-left: 2px;"></i><i class="fa fa-play-circle" style="font-size:24px;color:green; position: relative;top: 0px; left: 0px; display: inline-block; margin-right: 2px;"></i> </button>
+      <button class= "btn" id="StopRainButton"> <i class="fa fa-tint" aria-hidden="true" style="font-size: 24px; color: blue; position: relative;top: 2px; left: 0px; display: inline-block; margin-right: 5px; margin-left: 2px;"></i><i class="fa fa-pause-circle" style="font-size:24px;color:red; position: relative;top: 0px; left: 0px; display: inline-block; margin-right: 2px;"></i> </button>
+      <ul class="RainIntensity" id="RainIntensity">
         <li> 
             <input type="checkbox" id="lightRain" class="smallCheckBox">
             <label for="lightRain"><strong>Leichter Regen</strong></label>
@@ -264,6 +297,16 @@
             <label for="mediumRain"><strong>Starker Regen</strong></label>
         </li>
       </ul>
+        <button class= "btn" id="FavoritenAuswahlButton" >
+          
+          
+          <i class="fa fa-star-o" aria-hidden="true" style="font-size: 24px; position:relative;top: 0px; left: 0px; display: inline-block; margin-right: 0px; margin-left: 2px;"></i>
+          <i id ="startFavorites" class="fa fa-hand-o-up" style="font-size:24px;color:green; position: relative;top: 0px; left: 0px; display: inline-block;margin-right: 2px; margin-left: 0px;"></i>
+          <i id = "stopFavorites" class="fa fa-stop-circle-o" style="font-size:24px;color:red; position: relative;top: 0px; left: 0px; display: none; margin-right: 2px; margin-left: 0px;"></i>
+          <i id="deleteFavorites" class="fa fa-trash-o" aria-hidden="true" style="font-size:24px;color:red; position: relative;top: 0px; left: 0px; display: none; margin-right: 2px; margin-left: -1px" ></i>
+
+        </button>
+        <button class= "btn" id="counterButton" style="display: none;" ><strong>Favoriten: 0</strong></button>
       </div>
   </div>
 </div>
@@ -272,12 +315,17 @@
   <strong>Wasserhöhen</strong> <br> <br><img id="legendImage" src="" alt="Legend"> 
  </div>
 
- 
-
-
 <div id= "rain"></div>
 
 <ul class="layer-list" id= "layerlist">
+  <li>
+    <strong>Favoriten</strong>
+  </li>
+  <li>
+    <input type="checkbox" id="FavoritenCheckbox" checked>
+    <label for="FavoritenCheckbox">Favoriten</label>
+  </li>
+  <br>
   <li>
     <strong>3D Gebäude</strong>
   </li>
@@ -326,6 +374,7 @@
           <span>HQ500</span>
       </div>
     </li>
+    
 </ul>
  
 
@@ -430,6 +479,198 @@ const initialOrientation = {
 });
     
 
+
+
+// Favoritenauswahl
+let FavoritenAuswahl = false;
+const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+
+function generateRandomId() {
+    return Math.floor(Math.random() * 1000000);
+}
+
+// Array to keep track of FavoritenMarker entities
+var FavoritenMarkersArray = [];
+var favoriteCounter = 0;
+
+// Load saved FavoritenMarker on startup
+loadFavorites();
+
+// Update the favorite counter display
+function updateFavoriteCounter() {
+    document.getElementById('counterButton').innerHTML = `<strong>Favoriten: ${favoriteCounter}<strong>`;
+      if (favoriteCounter > 0) {
+        document.getElementById('counterButton').style.display = 'inline-block';
+        document.getElementById('deleteFavorites').style.display = 'inline-block';
+    } else {
+      document.getElementById('counterButton').style.display= 'none';
+      document.getElementById('deleteFavorites').style.display = 'none';
+    }
+}
+
+// Add a click event listener to the viewer to place a FavoritenMarker and save coordinates
+handler.setInputAction(function (click) {
+    if (!FavoritenAuswahl) return;
+    var earthPosition = viewer.scene.pickPosition(click.position);
+    if (Cesium.defined(earthPosition)) {
+        var cartographic = Cesium.Cartographic.fromCartesian(earthPosition);
+        var latitude = Cesium.Math.toDegrees(cartographic.latitude);
+        var longitude = Cesium.Math.toDegrees(cartographic.longitude);
+
+        // Add a FavoritenMarker at the clicked position
+        var FavoritenMarker = addFavoritenMarker(earthPosition, latitude, longitude);
+
+        // Save coordinates to local storage
+        saveCoordinate(latitude, longitude);
+
+        // Increment and update the favorite counter
+        favoriteCounter++;
+        updateFavoriteCounter();
+    }
+
+}, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+// Function to add a FavoritenMarker to the viewer and keep track of it
+function addFavoritenMarker(position, latitude, longitude) {
+    const id = generateRandomId();
+    var FavoritenMarker = viewer.entities.add({
+        position: position,
+        billboard: {
+            image: new Cesium.PinBuilder().fromMakiIconId("star", Cesium.Color.fromCssColorString('#242a2d'), 48), //alternatives fromMakiIcon, from Text, from URL, from Color
+            width: 50,
+            height: 50,
+            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+            verticalOrigin: Cesium.VerticalOrigin.CENTER,
+            horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+            distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0.0, Number.POSITIVE_INFINITY)
+        },
+        id: id,
+        properties: {
+            latitude: latitude,
+            longitude: longitude
+        },
+        customInfobox: true // to enable custom infobox
+    });
+    FavoritenMarkersArray.push(FavoritenMarker);
+    return FavoritenMarker;
+}
+
+// Function to save coordinates to local storage
+function saveCoordinate(lat, lng) {
+    var favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+    favorites.push({ lat: lat, lng: lng });
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+}
+
+// Function to load saved coordinates from local storage and display them
+function loadFavorites() {
+    var favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+    favorites.forEach(function (coord) {
+        var position = Cesium.Cartesian3.fromDegrees(coord.lng, coord.lat);
+        addFavoritenMarker(position, coord.lat, coord.lng);
+    });
+    // Set the counter to the number of loaded favorites
+    favoriteCounter = favorites.length;
+    updateFavoriteCounter();
+}
+
+// Function to clear all FavoritenMarker from the viewer and local storage
+function clearMarkers() {
+    // Remove only FavoritenMarker entities
+    FavoritenMarkersArray.forEach(function (FavoritenMarker) {
+        viewer.entities.remove(FavoritenMarker);
+    });
+    FavoritenMarkersArray = [];  // Clear the FavoritenMarkersArray array
+    localStorage.removeItem('favorites');
+
+    // Reset the counter
+    favoriteCounter = 0;
+    updateFavoriteCounter();
+}
+
+// Add an event listener to the clear markers button
+document.getElementById('deleteFavorites').addEventListener('click', clearMarkers);
+
+// Add an event listener to delete individual FavoritenMarker on right-click
+handler.setInputAction(function (click) {
+    var pickedObject = viewer.scene.pick(click.position);
+    if (Cesium.defined(pickedObject) && Cesium.defined(pickedObject.id)) {
+        // Get the marker entity and its coordinates
+        var FavoritenMarker = pickedObject.id;
+        if (Cesium.defined(FavoritenMarker.properties)) {
+            var lat = FavoritenMarker.properties.latitude.getValue();
+            var lng = FavoritenMarker.properties.longitude.getValue();
+
+            // Remove the marker entity from the viewer
+            viewer.entities.remove(FavoritenMarker);
+
+            // Remove the marker from the FavoritenMarkersArray
+            FavoritenMarkersArray = FavoritenMarkersArray.filter(marker => marker !== FavoritenMarker);
+
+            // Remove the marker coordinates from local storage
+            var favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+            favorites = favorites.filter(coord => coord.lat !== lat || coord.lng !== lng);
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+        }
+
+        // Decrement and update the favorite counter
+        favoriteCounter--;
+            updateFavoriteCounter();
+    }
+}, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
+
+// Add attributes to the Cesium infobox for the new features
+viewer.selectedEntityChanged.addEventListener(function (entity) {
+    if (Cesium.defined(entity)) {
+        // Check if the entity has the customInfobox property
+        if (entity.customInfobox) {
+            var id = entity.id;
+            var latitude = entity.properties.latitude.getValue();
+            var longitude = entity.properties.longitude.getValue();
+
+            // Create infobox content
+            var infoboxContent = `
+                <table>
+                    <tr><td>ID:</td><td>${id}</td></tr>
+                    <tr><td>Latitude:</td><td>${latitude}</td></tr>
+                    <tr><td>Longitude:</td><td>${longitude}</td></tr>
+                </table>
+            `;
+
+            // Set the infobox description
+            entity.description = new Cesium.ConstantProperty(infoboxContent);
+        } else {
+            // Use the default infobox content for other entities
+            entity.description = entity.description;
+        }
+    }
+});
+
+document.getElementById('startFavorites').addEventListener('click', function () {
+    document.getElementById('startFavorites').style.display = 'none';
+    document.getElementById('stopFavorites').style.display = 'inline-block';
+    showAllMarkers();
+    document.getElementById('FavoritenCheckbox').checked = true;
+    FavoritenAuswahl = !FavoritenAuswahl;
+    toggleView(-90, 0.01, 1200);
+    document.getElementById('zweid3dButton').style.display = "none";
+    viewer.infoBox.container.style.display = 'none'; //make sure Infoxbox does not show up when elements are clicked
+});
+
+document.getElementById('stopFavorites').addEventListener('click', function () {
+    document.getElementById('startFavorites').style.display = 'inline-block';
+    document.getElementById('stopFavorites').style.display = 'none';
+    showAllMarkers();
+    document.getElementById('FavoritenCheckbox').checked = true;
+    FavoritenAuswahl = !FavoritenAuswahl;
+    toggleView(-15, -0.01, 600);
+    document.getElementById('zweid3dButton').style.display = "block";
+    viewer.infoBox.container.style.display = 'block'; //make sure Infoxbox shows up again when elements are clicked
+});
+
+
+
 //2D/3D Button  
 //Function to switch 
 function toggleView(pitchInDegrees, latitudeOffset, heightOffset) {
@@ -515,6 +756,7 @@ let numberOfDrops = 0;
 let speed = 1.2;
 
 startRainButton.addEventListener('click', toggleRain);
+
 // Event listeners to ensure mutual exclusivity
 lightRainCheckbox.addEventListener('change', () => {
     if (lightRainCheckbox.checked) {
@@ -535,6 +777,7 @@ function toggleRain() {
     isRaining = !isRaining;
 
     if (isRaining) {
+      
          // Enable light rain by default
          lightRainCheckbox.checked = true;
         heavyRainCheckbox.checked = false;
@@ -543,6 +786,7 @@ function toggleRain() {
         
         //startRainButton.innerHTML = 'Stop Rain';
     } else {
+      
         stopRain();
         //startRainButton.innerText = 'Start Rain';
         
@@ -553,7 +797,8 @@ function toggleRain() {
 function startRain() {
   rainContainer.innerHTML = ''; // Clear existing drops if any
   document.getElementById('StartRainButton').style.display = 'none';
-  document.getElementById('StopRainButton').style.display = 'block';
+  document.getElementById('StopRainButton').style.display = 'inline-block';
+  document.getElementById('RainIntensity').style.display = 'inline-block';
     for (let i = 0; i < numberOfDrops; i++) {
         const drop = document.createElement('div');
         drop.classList.add('drop');
@@ -564,7 +809,7 @@ function startRain() {
         wmsStarkregenSelten.show = true;
         wmsStarkregenSeltenCheckbox.checked = true;
         document.getElementById('StartRainButton').style.display = 'none';
-        document.getElementById('StopRainButton').style.display = 'block';
+        document.getElementById('StopRainButton').style.display = 'inline-block';
           
     }
 }
@@ -574,21 +819,22 @@ function stopRain() {
     rainContainer.innerHTML = ''; // Clear all drops
         lightRainCheckbox.checked = false;
         heavyRainCheckbox.checked = false;
-        document.getElementById('StartRainButton').style.display = 'block';
+        document.getElementById('StartRainButton').style.display = 'inline-block';
         document.getElementById('StopRainButton').style.display = 'none';
+        document.getElementById('RainIntensity').style.display = 'none';
     if (wmsStarkregenSeltenCheckbox.checked=true) {
       wmsStarkregenSeltenCheckbox.checked = false, 
       wmsStarkregenSelten.show = false;
-      document.getElementById('StartRainButton').style.display = 'block';
+      document.getElementById('StartRainButton').style.display = 'inline-block';
       document.getElementById('StopRainButton').style.display = 'none';
         }
     if (wmsStarkregenExtremCheckbox.checked=true) {
       wmsStarkregenExtremCheckbox.checked = false, 
       wmsStarkregenExtrem.show = false; 
-      document.getElementById('StartRainButton').style.display = 'block';
+      document.getElementById('StartRainButton').style.display = 'inline-block';
       document.getElementById('StopRainButton').style.display = 'none';
     }
-    document.getElementById('StartRainButton').style.display = 'block';
+    document.getElementById('StartRainButton').style.display = 'inline-block';
     document.getElementById('StopRainButton').style.display = 'none';
 }
 function updateRainIntensity() {
@@ -615,7 +861,7 @@ function updateRainIntensity() {
         // Default rain intensity if no checkbox is selected
         numberOfDrops = 0;
         speed = 1.2;
-        startRainButton.style.display = 'block';
+        startRainButton.style.display = 'inline-block';
         stopRainButton.style.display = 'none';
         stopRain();
         
@@ -629,9 +875,9 @@ function updateRainIntensity() {
 function updateButtonState() {
     if (isRaining) {
         startRainButton.style.display = 'none';
-        stopRainButton.style.display = 'block';
+        stopRainButton.style.display = 'inline-block';
     } else if (!isRaining) {
-        startRainButton.style.display = 'block';
+        startRainButton.style.display = 'inline-block';
         stopRainButton.style.display = 'none';
     }
 }
@@ -639,7 +885,7 @@ function updateButtonState() {
 //Stop Rain Button Functionality
 document.getElementById('StopRainButton').addEventListener('click', () => {
     stopRain();
-    document.getElementById('StartRainButton').style.display = 'block';
+    document.getElementById('StartRainButton').style.display = 'inline-block';
     document.getElementById('StopRainButton').style.display = 'none';
 })
    
@@ -886,6 +1132,33 @@ document.getElementById('legendbutton').addEventListener('click', () => {
    //Rheinpegel
    document.getElementById('RheinPegelCheckbox').addEventListener('change', () => {
         RheinPegel.show = !RheinPegel.show;
+        });
+
+    //Favoriten
+// Function to show all markers
+function showAllMarkers() {
+    for (var i = 0; i < FavoritenMarkersArray.length; i++) {
+        FavoritenMarkersArray[i].show = true;
+    }
+}
+
+// Function to hide all markers
+function hideAllMarkers() {
+    for (var i = 0; i < FavoritenMarkersArray.length; i++) {
+        FavoritenMarkersArray[i].show = false;
+    }
+}
+
+    document.getElementById('FavoritenCheckbox').addEventListener('change', () => {
+      
+        FavoritenMarkersArray.show = !FavoritenMarkersArray.show;
+        if (FavoritenMarkersArray.show) {
+          hideAllMarkers();
+          document.getElementById('FavoritenCheckbox').checked = false;
+        } else {
+          showAllMarkers();
+          document.getElementById('FavoritenCheckbox').checked = true;
+        }
         });
 
         //Hochwasser mit Slider
