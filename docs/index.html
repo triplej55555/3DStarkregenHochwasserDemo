@@ -42,6 +42,7 @@
       height: 50px;
       width: 100%;
       z-index: 1000;
+      font-family: Arial, Helvetica, sans-serif;
     }
     #header img {
       margin-right: 10px; /* Adjust the value to control the space between the image and the text */
@@ -70,7 +71,7 @@
   height:  50px;
   gap: 5px;
   top: 6px;
-  left: 10px;
+  left: 8px;
   z-index: 1000;
 }
 .btn {
@@ -108,6 +109,25 @@
         font-family: Arial, Helvetica, sans-serif;
         
       }
+      #favoriteInput {
+        position: absolute; 
+        top: 50%; 
+        left: 50%; 
+        transform: translate(-50%, -50%); 
+        z-index: 3000; 
+        background: white; 
+        padding: 5px; 
+        border: 3px solid yellow; 
+        display: none; 
+        width: 300px; 
+        height: 20%;
+      }
+     #favoriteInput:focus {
+      border-color: yellow;
+      box-shadow: 0 0 5px rgba(102, 175, 233, 0.5);
+      outline: none;
+    }
+
     #zweid3dButton {
       position: absolute;
       top: 7px;
@@ -117,8 +137,8 @@
       background: #323436da;
       color: white;
       padding: 2px;
-      border: 0px solid #ccc;
-      border-radius: 0px;
+      border: 1px solid #cccccc42;
+      border-radius: 5px;
       font-family: Arial, Helvetica, sans-serif;
       font-weight: bold;
       align-content: center;      
@@ -126,15 +146,16 @@
     #zweid3dButton:hover {
   background: #4488bb; /* Change background color on hover */
   border: white solid 1px;
+  box-shadow: 0px 0px 0px 2px rgba(255, 255, 255, 0.308);
   border-radius: 5px;
   color: #fff;      /* Change text color on hover */
 }
 
  .layer-list {
-      display: block;  
+      display: block;
       position: absolute;
-      top: 50px;
-      left: 10px;
+      top: 38px;
+      left: 8px;
       background: white;
       color: black;
       padding: 10px;
@@ -143,26 +164,31 @@
       list-style: none;
       font-family: Arial, Helvetica, sans-serif;
       z-index: 10000;
+      width: 200px;
     }
     .layer-list li {
       margin-bottom: 5px;
     }
+    
     #legend {
-            position: absolute;
-            top: 68px;
-            left: 250px;
+      display: none;      
+      position: relative;
+      bottom: -448px;
+      left: 8px;
             background-color: rgb(255, 255, 255);
             padding: 10px;
             border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            
             z-index: 200;
             display: none;
             font-family: Arial, Helvetica, sans-serif;
-            text-align: center;
+            text-align: left;
             align-items: center;
+            width: 200px;
+            height: 225px;
         }
         #legend img {
-            max-width: 200px;
+            max-width: 300px;
         }
     
         #sliderContainer {
@@ -280,8 +306,9 @@
 
   
 <div id="cesiumContainer">
-  <div id= "header"><img src="img\Logo1_Starkregen&Hochwasser.png" height="35" position="center" alt="My Logo">
-    <span> 3D Starkregen/Hochwasser Demo</span> 
+  <div id= "header"><img src="img\07_Logo_ SR_HW_Anwendung.jpg" height="35" position="center" alt="My Logo">
+    <span style="margin-left: 0px; margin-right: -5px;"> 3D Starkregen / Hochwasser Demo &nbsp</span> 
+    <img src="img\07_Logo_ SR_HW_Anwendung.jpg" height="35" position="center" alt="My Logo">
     <div class="button-container">
       <button class= "btn" id="layerbutton" ><strong>Layer</strong></button>
       <button class= "btn" id="legendbutton"><strong>Legende</strong></button>
@@ -310,10 +337,9 @@
       </div>
   </div>
 </div>
+<input type="text" id="favoriteInput" placeholder="Kommentar eingeben">
 <button id="zweid3dButton">2D/3D</button>
-<div id="legend">
-  <strong>Wasserhöhen</strong> <br> <br><img id="legendImage" src="" alt="Legend"> 
- </div>
+
 
 <div id= "rain"></div>
 
@@ -335,7 +361,7 @@
   </li>
   <li>
     <input type="checkbox" id="GooglePhotorealisticCheckbox" >  <!-- 'check ed' hier bedeutet ist beim Start an! -->
-    <label for="GooglePhotorealisticCheckbox">GooglePhotorealistic</label>
+    <label for="GooglePhotorealisticCheckbox">Google Photorealistic</label>
   </li>
   <li>
     <input type="checkbox" id="LoD2Checkbox" checked>
@@ -367,15 +393,19 @@
       <input type="checkbox" id="HochwasserCheckbox">
       <label for="layerSlider"></label>
       <input type="range" id="layerSlider" min="0" max="2" value="0">
-      <div class="slider-labels">
-          <span>  &nbsp  &nbsp  &nbsp    </span>
+      <div class="slider-labels" style="font-size: 14px;">
+          <span>  &nbsp   &nbsp    </span>
           <span>HQ10</span>
-          <span>HQ100</span>
-          <span>HQ500</span>
+          <span>&nbsp &nbsp HQ100</span>
+          <span>&nbsp &nbsp HQ500</span>
       </div>
     </li>
     
+    
 </ul>
+<div id="legend">
+  <strong>Wasserhöhen</strong> <br> <img id="legendImage" src="img/Wasserhoehe_legende.png" style="width: 200px; align-items: center;" alt="Legend"> 
+ </div>
  
 
 <!-- Script for Cesium Application-->
@@ -498,14 +528,26 @@ loadFavorites();
 
 // Update the favorite counter display
 function updateFavoriteCounter() {
-    document.getElementById('counterButton').innerHTML = `<strong>Favoriten: ${favoriteCounter}<strong>`;
-      if (favoriteCounter > 0) {
+    document.getElementById('counterButton').innerHTML = `<strong>Favoriten: ${favoriteCounter}</strong>`;
+    if (favoriteCounter > 0) {
         document.getElementById('counterButton').style.display = 'inline-block';
         document.getElementById('deleteFavorites').style.display = 'inline-block';
     } else {
-      document.getElementById('counterButton').style.display= 'none';
-      document.getElementById('deleteFavorites').style.display = 'none';
+        document.getElementById('counterButton').style.display = 'none';
+        document.getElementById('deleteFavorites').style.display = 'none';
     }
+}
+
+// Function to show the input field and enable FavoritenAuswahl
+function showFavoriteInput() {
+    document.getElementById('favoriteInput').style.display = 'block';
+    document.getElementById('favoriteInput').focus();
+}
+
+// Function to hide the input field and disable FavoritenAuswahl
+function hideFavoriteInput() {
+    document.getElementById('favoriteInput').style.display = 'none';
+    document.getElementById('favoriteInput').value = ''; // Clear the input field
 }
 
 // Add a click event listener to the viewer to place a FavoritenMarker and save coordinates
@@ -517,26 +559,40 @@ handler.setInputAction(function (click) {
         var latitude = Cesium.Math.toDegrees(cartographic.latitude);
         var longitude = Cesium.Math.toDegrees(cartographic.longitude);
 
-        // Add a FavoritenMarker at the clicked position
-        var FavoritenMarker = addFavoritenMarker(earthPosition, latitude, longitude);
+        showFavoriteInput();
 
-        // Save coordinates to local storage
-        saveCoordinate(latitude, longitude);
+        document.getElementById('favoriteInput').addEventListener('keypress', function onEnter(e) {
+            if (e.key === 'Enter') {
+                // Get the text input from the user
+                var text = document.getElementById('favoriteInput').value;
 
-        // Increment and update the favorite counter
-        favoriteCounter++;
-        updateFavoriteCounter();
+                // Add a FavoritenMarker at the clicked position
+                var FavoritenMarker = addFavoritenMarker(earthPosition, latitude, longitude, text);
+
+                // Save coordinates to local storage
+                saveCoordinate(latitude, longitude, text);
+
+                // Increment and update the favorite counter
+                favoriteCounter++;
+                updateFavoriteCounter();
+
+                // Hide the input field after setting the favorite
+                hideFavoriteInput();
+
+                // Remove the event listener after use
+                document.getElementById('favoriteInput').removeEventListener('keypress', onEnter);
+            }
+        });
     }
-
 }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
 // Function to add a FavoritenMarker to the viewer and keep track of it
-function addFavoritenMarker(position, latitude, longitude) {
+function addFavoritenMarker(position, latitude, longitude, text) {
     const id = generateRandomId();
     var FavoritenMarker = viewer.entities.add({
         position: position,
         billboard: {
-            image: new Cesium.PinBuilder().fromMakiIconId("star", Cesium.Color.fromCssColorString('#242a2d'), 48), //alternatives fromMakiIcon, from Text, from URL, from Color
+            image: new Cesium.PinBuilder().fromMakiIconId("star", Cesium.Color.fromCssColorString('#242a2d'), 48),
             width: 50,
             height: 50,
             heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
@@ -548,7 +604,8 @@ function addFavoritenMarker(position, latitude, longitude) {
         id: id,
         properties: {
             latitude: latitude,
-            longitude: longitude
+            longitude: longitude,
+            text: text
         },
         customInfobox: true // to enable custom infobox
     });
@@ -557,9 +614,9 @@ function addFavoritenMarker(position, latitude, longitude) {
 }
 
 // Function to save coordinates to local storage
-function saveCoordinate(lat, lng) {
+function saveCoordinate(lat, lng, text) {
     var favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-    favorites.push({ lat: lat, lng: lng });
+    favorites.push({ lat: lat, lng: lng, text: text });
     localStorage.setItem('favorites', JSON.stringify(favorites));
 }
 
@@ -568,7 +625,7 @@ function loadFavorites() {
     var favorites = JSON.parse(localStorage.getItem('favorites')) || [];
     favorites.forEach(function (coord) {
         var position = Cesium.Cartesian3.fromDegrees(coord.lng, coord.lat);
-        addFavoritenMarker(position, coord.lat, coord.lng);
+        addFavoritenMarker(position, coord.lat, coord.lng, coord.text);
     });
     // Set the counter to the number of loaded favorites
     favoriteCounter = favorites.length;
@@ -616,18 +673,20 @@ handler.setInputAction(function (click) {
 
         // Decrement and update the favorite counter
         favoriteCounter--;
-            updateFavoriteCounter();
+        updateFavoriteCounter();
     }
 }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
 
 // Add attributes to the Cesium infobox for the new features
-viewer.selectedEntityChanged.addEventListener(function (entity) {
+viewer.selectedEntityChanged.addEventListener(function () {
+    var entity = viewer.selectedEntity;
     if (Cesium.defined(entity)) {
         // Check if the entity has the customInfobox property
         if (entity.customInfobox) {
             var id = entity.id;
             var latitude = entity.properties.latitude.getValue();
             var longitude = entity.properties.longitude.getValue();
+            var text = entity.properties.text.getValue();
 
             // Create infobox content
             var infoboxContent = `
@@ -635,27 +694,26 @@ viewer.selectedEntityChanged.addEventListener(function (entity) {
                     <tr><td>ID:</td><td>${id}</td></tr>
                     <tr><td>Latitude:</td><td>${latitude}</td></tr>
                     <tr><td>Longitude:</td><td>${longitude}</td></tr>
+                    <tr><td>Kommentar:</td><td>${text}</td></tr>
                 </table>
             `;
 
             // Set the infobox description
             entity.description = new Cesium.ConstantProperty(infoboxContent);
-        } else {
-            // Use the default infobox content for other entities
-            entity.description = entity.description;
         }
     }
 });
 
+// Event listeners for starting and stopping favorite selection mode
 document.getElementById('startFavorites').addEventListener('click', function () {
     document.getElementById('startFavorites').style.display = 'none';
     document.getElementById('stopFavorites').style.display = 'inline-block';
     showAllMarkers();
     document.getElementById('FavoritenCheckbox').checked = true;
-    FavoritenAuswahl = !FavoritenAuswahl;
+    FavoritenAuswahl = true;
     toggleView(-90, 0.01, 1200);
     document.getElementById('zweid3dButton').style.display = "none";
-    viewer.infoBox.container.style.display = 'none'; //make sure Infoxbox does not show up when elements are clicked
+    viewer.infoBox.container.style.display = 'none'; // Make sure Infobox does not show up when elements are clicked
 });
 
 document.getElementById('stopFavorites').addEventListener('click', function () {
@@ -663,11 +721,14 @@ document.getElementById('stopFavorites').addEventListener('click', function () {
     document.getElementById('stopFavorites').style.display = 'none';
     showAllMarkers();
     document.getElementById('FavoritenCheckbox').checked = true;
-    FavoritenAuswahl = !FavoritenAuswahl;
+    FavoritenAuswahl = false;
     toggleView(-15, -0.01, 600);
     document.getElementById('zweid3dButton').style.display = "block";
-    viewer.infoBox.container.style.display = 'block'; //make sure Infoxbox shows up again when elements are clicked
+    viewer.infoBox.container.style.display = 'block'; // Make sure Infobox shows up again when elements are clicked
+    hideFavoriteInput();
 });
+
+
 
 
 
@@ -898,6 +959,7 @@ document.getElementById('StopRainButton').addEventListener('click', () => {
   } 
   else  {
   document.getElementById('layerlist').style.display = 'block';
+  
   } 
 });
 
@@ -1223,9 +1285,7 @@ function hideAllMarkers() {
                 }
             });
 
-            //Wasserhöhen Legende
-        const legendUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHoAAACLCAYAAACul41YAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAjXSURBVHhe7Z1dSBRfFMCPblFh32bQN76kFVH4UUSkDxH00jf1UFCJkSCJFqSJUQ8GQUXx78U0i4qIIuihh4io1HqIUikI6SmDoIJEKgKxUue/53qn1t2dnbm7M3tn95wfXPbeudeZ2f3tufOxpynDCAJM2pMpX52RmwvQ0SEbCdDeProuJmmoib52DWDnzsRko+Rdu0bXxSQPnLqVaG83jJyc0VdV2tri/1smIdRFI/HIZslaiU80oiKbJWsnftGIE9ks2RckJhqJJZsl+4bERSPRZLNkX+GOaCRUdhIkj4yMGLW1tcaMGTNEOXbsmFhmBV5gmIUi7r5rFDt9+mjxOJIvXbpkFBQUGL29vaJg/fLly7LXGqqi1W6Y2CE+x8Tp7u6GhoYGWLp0qVwSyfXr1+HUqVOQm5srCtavuXgTJiMjQ6xz3rx5MGfOHLh//z6cPn0asrOzYeHChfDs2TM5MkWQwhMndLrGojB1Dw0NBYe2G9XV1UbwQzTy8vLEVPzq1Ss5IpKpU6cafX19smUYX79+DU4kwZnEBqdvGcdVVlYaP378MFpbW42srCzj0KFDf9uFhYVyZGrgjuhox2SHssvLy4PDcsTU29jYaPT09Mie2GRmZhq/f/+WLUPUA4GAbFmjIrq/v1/UBwcHI9oTJkwQ9VQh8anbvHd99y5AaalcGATruMzm3nhwH8QrTpVmccLkyZMhGF2yBfD9+3eYMmWKbLnDzJkzxWtQqngNbf/69UvUU4ZR33Hi5OzaQWTj1N0WXFdVVZWxYMECIz8/36ivrzc6OzvliEjWrFljPHjwQLYMUV+7dq1sWeP0LYePs2v7nfj3VuUSyoHsUPDYjKJRuBVNTU0xz7qtRLBoFVQkmyjKtgOvmY8ePSpOwLDU1dWNuY6OJia8xCK8367td9T3Nh7JJi7LZpyjJjoRySYsWwtqOWOY/oM3JULPruMBz8LLygB6e+UCxms4OZAI7t4CZXwLiyaC0tTd3S8rLlGYLSuM53BEE4FFE4FFE4FFE4FFE4FFE4FFE0G7aLyMr6urE9kbWOrr68UyK1QzUexIZPtu7ofXaBfd0tICjx8/FpmfWB49egRXrlyRvZGghFgiVFHdPmLug9v74iXaRXudtmsHlbRh7aJ7enqguLhYtgCKiorEsmQRz/ZzcnIgKysLli9fDhcvXoTh4WHZE50vX77Au3fvhPDdu3fD58+f4cOHD3Dy5Ek4cuSIHOUt2u91BwIBGBwchPHjx4tlf/78gUmTJsHQ0JBoW4GR4sa0Ge/2MQv07du3UFNTI74oFy5ckD1jwf3s7+8Xx3/8m4kTJ45pT5s2TWzfa7RHtNdpu+YJE5ZoxLt9TPnF6L9165btVI9SEZ1pw9pFL1u2DDo7O2ULoKurSyxzC/OEySr6E91+ZmamiFK/o1303r174fjx4+KYhQXr+/fvl72jEeklqtvfsmWL+DIMDAyI425ZWRnsxH+k4HO0i66oqID169dDQUGBKBs2bIDy8nLZG0noNBxajxfV7R84cAAqKyvFCdmmTZtg9erVcObMGdnrXzjxgAjaI5pJDiyaCJzuSwSOaCKwaCIoTd0t3bLiEgcLZYXxHI5oIrBoIrBoIrBoIrBoIrBoIrBoImgXjZfxOtNt3VqP39EuWne6rRvrSAW0i9ad7qsKRr4f0ndV0S46Gem2buOH9F1VtN/r9jrd1ikYqU4+Chznh/RdVbSLxg/m/fv3MGvWLLGsr68PFi9eDN++fRNtOz5+/AgrVqywHB96khXrraqIDh1n1/YL2qdur9Nt8UM3C2W0i6aSbqsb7aJ1p9viF8n8MoXW0w1OPCCC9ohmkgOLJgKn+xKBI5oILJoISlN3dYusuMR/B2WF8RyOaCKwaCKwaCKwaCKwaCKwaCKwaCJoF23+NOjWz4NtbW2wceNGkbkyd+5c8bMmpvpQR7tovF/j5u12TNDD36sxPenNmzcwbtw42Ldvn+ylS9pN3Zhuu3nzZpGDNnv2bDh79iw8f/5c9kaCM0kqpu+qkvbH6KdPn4oslFikYvquKr65142R5eYUjrx+/Rp27NgBDx8+FJml0cDtpmL6riopF9HmiRuWWLS3t8PWrVvh9u3blpJNUCqi8+m7XpNyos2Tt1jRf+fOHdizZw/cu3cPVq1aJZfSJu2O0efPn4fa2lp48uQJFBZy9qGJ9mN0tClYYZcisJrSf/78KR7CHg6OD92eXTtV0R7R+CGGl0SItj4s0SQj2BeKXTtVSfvLK2YUFk0ETvclAkc0EVg0EZSm7pIKWXGJZ82ywngORzQRWDQRWDQRWDQRWDQRWDQRWDQRtIt2Mz23tLTU8mdK6mgX7VZ6Lj481u6xkpTx3Z0xTBCYP3/+mP+l3Q58POTKlSvFI6Dz8/Nj/oaMEd/Y2AhNTU0wMjICzc3N4iGz586dEw+SvXnzJpSUlMjR6YPvjtFO0nPDwYe5V1VVQV5enlwSGwrpveH4KqKdpOeG8/LlSyEHk/TxuaB2qT/YTyG9NxzfRLTT9FwUZRbk8OHD4on9KNkpFNJ7w/GFaJX0XIxWsyAvXryAJUuWjJFvvjL/0C460fTcUPGmfPOV+Yf2Y7RV9Fml59qB64v1lsL77drpgvaIxg81WolHMoJ/G4vwfrt2uuCbkzHGW1g0ETjdlwgc0URg0URQmrozitz9TzWMLv5nrcmCI5oILJoILJoILJoILJoILJoILJoIaSGa03ztSXnRnObrDO2iMQ2ooaEBurvV77phmu+JEyfg6tWrcok1GPEUnuJrhXbRN27cEPnVmDO2aNEiqKmpgY6ODhgeHpYjrOE0X+f46l43JtJjgiCWT58+iedut7a2yt6xcJqvGr46RqMMsyCxxHGarxraI7qrq+tvFA8MDIjc7u3bt8O6desgEAjIkZGYX4ZwrN4Ojg/ts2unG9pF48nYtm3bRCkuLpY96tiJYtEK787Pv0ez6Nik/HW0iZ2k8H67drqRNqKZ2LBoIigdo5nUhSOaCCyaBAD/A0q+H4nVlB/LAAAAAElFTkSuQmCC';
-        document.getElementById('legendImage').src = legendUrl;
+            
 
 </script>
 </body>
