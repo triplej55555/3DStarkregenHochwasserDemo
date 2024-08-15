@@ -13,9 +13,9 @@
   <link href="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-  <script src="./cesium-drawhelper-master/DrawHelper.js"> </script>
+  <script src="./cesium-drawhelper-master/cesium-drawhelper-master/DrawHelper.js"> </script>
   <style>
-    @import url('./cesium-drawhelper-master/DrawHelper.css');
+    @import url('./cesium-drawhelper-master/cesium-drawhelper-master/DrawHelper.css');
 
     body{
         margin: 0;
@@ -459,7 +459,7 @@
         <i id="deleteFavorites" title="Alle Favoriten löschen" class="fa fa-trash-o" aria-hidden="true" style="font-size:24px;color:red; position: relative;top: 0px; left: 0px; display: none; margin-right: 2px; margin-left: -1px" ></i>
 
       </button>
-      <button class= "btn" id="counterButton" style="display: inline-block;" ><strong>Favoriten: 0</strong></button>
+      <button class= "btn" id="counterButton" style="display: none;" ><strong>Favoriten: 0</strong></button>
       <button class= "btn" id= "drawPolygonButton" > 
         <i class="fa-solid fa-draw-polygon" id="startPolygon" title="Polygon-Zeichnen Modus aktivieren" aria-hidden="true" style="font-size:24px;color:black; position: relative;top: 1px; left: 0px; display: inline-block;margin-right: 5px; margin-left: 5px;"></i>
         <i id ="drawPolygon" title="Polygon Zeichnen" class="fa-solid fa-pencil" style="font-size:20px;color:green; position: relative;top: 0px; left: 0px; display: none;margin-right: 2px; margin-left: 5px;"></i>
@@ -473,7 +473,7 @@
         <i id="deletePolygon" title="Alle Polygone löschen" class="fa fa-trash-o" aria-hidden="true" style="font-size:24px;color:red; position: relative;top: 0px; left: 0px; display: none; margin-right: 2px; margin-left: -1px" ></i>
         
       </button>
-      <button class= "btn" id="counterButton2" style="display: inline-block" ><strong>Polygone: 0</strong></button>
+      <button class= "btn" id="counterButton2" style="display: none;" ><strong>Polygone: 0</strong></button>
   
     </div>
 </div>
@@ -711,10 +711,10 @@ loadFavorites();
 function updateFavoriteCounter() {
     document.getElementById('counterButton').innerHTML = `<strong>Favoriten: ${favoriteCounter}</strong>`;
     if (favoriteCounter > 0) {
-        //document.getElementById('counterButton').style.display = 'inline-block';
+        document.getElementById('counterButton').style.display = 'inline-block';
         document.getElementById('deleteFavorites').style.display = 'inline-block';
     } else {
-        //document.getElementById('counterButton').style.display = 'none';
+        document.getElementById('counterButton').style.display = 'none';
         document.getElementById('deleteFavorites').style.display = 'none';
     }
         
@@ -994,10 +994,10 @@ document.getElementById('stopFavorites').addEventListener('click', function () {
 function updatePolygonCounter() {
     document.getElementById('counterButton2').innerHTML = `<strong>Polygone: ${polygonEntitiesArray.length}</strong>`;
     if (polygonEntitiesArray.length > 0) {
-        //document.getElementById('counterButton2').style.display = 'inline-block';
+        document.getElementById('counterButton2').style.display = 'inline-block';
         document.getElementById('deletePolygon').style.display = 'inline-block';
     } else {
-        //document.getElementById('counterButton2').style.display = 'none';
+        document.getElementById('counterButton2').style.display = 'none';
         document.getElementById('deletePolygon').style.display = 'none';
     }
 }
