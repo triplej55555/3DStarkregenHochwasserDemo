@@ -53,7 +53,23 @@
     #header span {
       display: inline-block;
     } 
-  
+    /*#header2{
+      display: flex;
+      position: absolute;
+      align-items: center;
+      text-align: center;
+      justify-content: center;
+      align-content: center;
+      background-color: rgba(12, 11, 11, 0.836);
+      border: 0 solid black;
+      color: white;
+      font-size: 25px;
+      height: 50px;
+      width: 100%;
+      z-index: 1000;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+*/
     .cesium-viewer-toolbar {
       position: absolute;
       top: 5px;
@@ -293,6 +309,69 @@
       justify-content: center;
       align-items: center;
     }
+    #buildingFilterButton {
+      background: white;
+      color: black;
+      padding: 0px;
+      height: 35px;
+      border: 0px solid #ccc;
+      border-radius: 10px;
+      font-family: Arial, Helvetica, sans-serif;
+      width: fit-content;
+      display: inline-block;
+      align-content: center;
+      justify-content: center;
+      align-items: center;
+    }
+    #heightInput {
+    margin-left: 5px;
+      margin-right: 0px; /* Add some space between the input and button */
+    padding: 5px;
+    width: 50px;
+    border-radius: 3px;
+    border: 1px solid #ccc;
+    outline: none;
+}
+
+#filterButton {
+  margin-right: 5px;  
+  padding: 5px 10px;
+    border-radius: 3px;
+    border: 1px solid #ccc;
+    background-color: grey;
+    color: white;
+    cursor: pointer;
+    outline: none;
+}
+
+#filterButton:hover {
+    background-color: #005bb5;
+}
+    #floodStatisticButton{
+      background: white;
+      color: black;
+      padding: 1px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-family: Arial, Helvetica, sans-serif;
+      width: fit-content;
+      display: inline-block;
+      align-content: center;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #floodCounterButton {
+        
+        z-index: 1000;
+        background: white;
+        color: black;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        font-family: Arial, Helvetica, sans-serif;
+        
+      }
 
     #rain {
     position: absolute;
@@ -474,7 +553,13 @@
         
       </button>
       <button class= "btn" id="counterButton2" style="display: none;" ><strong>Polygone: 0</strong></button>
-  
+      <button class="btn" id="floodStatisticButton"><i class="fa-solid fa-house-flood-water" style="font-size: 20px; color: rgb(24, 24, 20); margin-left: 3px; margin-right: 3px;"></i> <strong style="position: relative;top: -3px; left: 0px; margin-right: 2px;">Statistik</strong></button>
+      <div class="btn" id="buildingFilterButton">
+        <input type="number" id="heightInput" placeholder="Höhe"style="position: relative; top: -2px;">
+        <button id="filterButton" style="position: relative; top: -2px;">Filter 3D Tiles </button>
+        <i id="deleteFilter" title="Alle Polygone löschen" class="fa fa-trash-o" aria-hidden="true" style="font-size:24px;color:red; position: relative;top: 2px; left: 0px; display: inline-block; margin-right: 2px; margin-left: -5px" ></i>
+      </div>
+    
     </div>
 </div>
 
@@ -668,6 +753,10 @@
       
         // Enable depth testing so things behind the terrain are not visible
   viewer.scene.globe.depthTestAgainstTerrain = true;
+// Wait for the Cesium Viewer to initialize and then modify the iframe sandbox attribute
+viewer.infoBox.frame.removeAttribute("sandbox");
+viewer.infoBox.frame.setAttribute("sandbox", "allow-same-origin allow-popups allow-forms allow-scripts");
+viewer.infoBox.frame.src = "about:blank";
 
 
 //startView and Fly the camera Cologne at the given longitude, latitude, and height.
@@ -691,6 +780,9 @@ const initialOrientation = {
   commandInfo.cancel = true; // Cancel the default home button action
 });
     
+
+
+
 
 // Favoritenauswahl
 let FavoritenAuswahl = false;
@@ -732,14 +824,21 @@ function hideFavoriteInput() {
     document.getElementById('favoriteInput').value = ''; // Clear the input field
 }
 
+
+
 // Add a click event listener to the viewer to place a FavoritenMarker and save coordinates
 handler.setInputAction(function (click) {
     if (!FavoritenAuswahl) return;
+    
     var earthPosition = viewer.scene.pickPosition(click.position);
+    
     if (Cesium.defined(earthPosition)) {
         var cartographic = Cesium.Cartographic.fromCartesian(earthPosition);
         var latitude = Cesium.Math.toDegrees(cartographic.latitude);
         var longitude = Cesium.Math.toDegrees(cartographic.longitude);
+
+        // Generate a unique ID for this marker
+        var id = generateRandomId();
 
         showFavoriteInput();
 
@@ -748,11 +847,11 @@ handler.setInputAction(function (click) {
                 // Get the text input from the user
                 var text = document.getElementById('favoriteInput').value;
 
-                // Add a FavoritenMarker at the clicked position
-                var FavoritenMarker = addFavoritenMarker(earthPosition, latitude, longitude, text);
+                // Add a FavoritenMarker at the clicked position with the generated id
+                var FavoritenMarker = addFavoritenMarker(earthPosition, latitude, longitude, text, id);
 
-                // Save coordinates to local storage
-                saveCoordinate(latitude, longitude, text);
+                // Save coordinates to local storage with the id
+                saveCoordinate(latitude, longitude, text, id);
 
                 // Increment and update the favorite counter
                 favoriteCounter++;
@@ -769,8 +868,7 @@ handler.setInputAction(function (click) {
 }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
 // Function to add a FavoritenMarker to the viewer and keep track of it
-function addFavoritenMarker(position, latitude, longitude, text) {
-    const id = generateRandomId();
+function addFavoritenMarker(position, latitude, longitude, text, id) {
     var FavoritenMarker = viewer.entities.add({
         position: position,
         billboard: {
@@ -783,7 +881,7 @@ function addFavoritenMarker(position, latitude, longitude, text) {
             disableDepthTestDistance: Number.POSITIVE_INFINITY,
             distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0.0, Number.POSITIVE_INFINITY)
         },
-        id: id,
+        id: id,  // Use the provided id here
         properties: {
             latitude: latitude,
             longitude: longitude,
@@ -791,14 +889,15 @@ function addFavoritenMarker(position, latitude, longitude, text) {
         },
         customInfobox: true // to enable custom infobox
     });
+    
     FavoritenMarkersArray.push(FavoritenMarker);
     return FavoritenMarker;
 }
 
 // Function to save coordinates to local storage
-function saveCoordinate(lat, lng, text) {
+function saveCoordinate(lat, lng, text, id) {
     var favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-    favorites.push({ lat: lat, lng: lng, text: text });
+    favorites.push({ lat: lat, lng: lng, text: text, id: id });
     localStorage.setItem('favorites', JSON.stringify(favorites));
 }
 
@@ -807,12 +906,41 @@ function loadFavorites() {
     var favorites = JSON.parse(localStorage.getItem('favorites')) || [];
     favorites.forEach(function (coord) {
         var position = Cesium.Cartesian3.fromDegrees(coord.lng, coord.lat);
-        addFavoritenMarker(position, coord.lat, coord.lng, coord.text);
+        var marker = addFavoritenMarker(position, coord.lat, coord.lng, coord.text, coord.id);
+
+        // Safely load the image from localStorage and set it in the infobox content
+        const imageDataUrl = localStorage.getItem('favoriteImage-' + coord.id);
+        if (imageDataUrl && marker && marker.description) {
+            // Get the description value safely
+            const descriptionPromise = marker.description.getValue();
+            if (descriptionPromise && typeof descriptionPromise.then === 'function') {
+                descriptionPromise.then(function(content) {
+                    if (content) {
+                        content = content.replace(
+                            '<img id="favoriteImage" src=""',
+                            `<a href="${imageDataUrl}" target="_blank"><img id="favoriteImage" src="${imageDataUrl}" style="width: 100%; height: auto; max-width: 400px; max-height: 400px;"/></a>`
+                        );
+                        marker.description = new Cesium.ConstantProperty(content);
+
+                        // Force the infobox to resize after updating the content
+                        forceInfoboxResize();
+                    }
+                }).catch(function(error) {
+                    console.error("Error while updating marker description:", error);
+                });
+            }
+        }
     });
+
     // Set the counter to the number of loaded favorites
     favoriteCounter = favorites.length;
     updateFavoriteCounter();
 }
+
+
+
+
+
 
 // Function to clear all FavoritenMarker from the viewer and local storage
 function clearMarkers() {
@@ -869,6 +997,7 @@ handler.setInputAction(function (click) {
             var favorites = JSON.parse(localStorage.getItem('favorites')) || [];
             favorites = favorites.filter(coord => coord.lat !== lat || coord.lng !== lng);
             localStorage.setItem('favorites', JSON.stringify(favorites));
+            localStorage.removeItem('favoriteImage-' + FavoritenMarker.id);
 
             // Decrement and update the favorite counter
             favoriteCounter--;
@@ -884,12 +1013,13 @@ handler.setInputAction(function (click) {
 viewer.selectedEntityChanged.addEventListener(function () {
     var entity = viewer.selectedEntity;
     if (Cesium.defined(entity)) {
-        // Check if the entity has the customInfobox property
         if (entity.customInfobox) {
             var id = entity.id;
             var latitude = entity.properties.latitude.getValue();
             var longitude = entity.properties.longitude.getValue();
             var text = entity.properties.text.getValue();
+
+            var imageDataUrl = localStorage.getItem('favoriteImage-' + id) || '';
 
             // Create infobox content
             var infoboxContent = `
@@ -898,15 +1028,108 @@ viewer.selectedEntityChanged.addEventListener(function () {
                     <tr><td>Latitude:</td><td>${latitude}</td></tr>
                     <tr><td>Longitude:</td><td>${longitude}</td></tr>
                     <tr><td>Kommentar:</td><td>${text}</td></tr>
+                    <tr><td>Image:</td><td>
+                        <a href="javascript:void(0)" id="imageLink">
+                            <img id="favoriteImage" src="${imageDataUrl}" style="width: 100%; height: auto; max-width: 400px; max-height: 400px; cursor: pointer;"/>
+                        </a>
+                    </td></tr>
+                    <tr><td>Upload Image:</td><td><input type="file" id="imageUpload" accept="image/*"></td></tr>
                 </table>
             `;
 
-            // Set the infobox description
             entity.description = new Cesium.ConstantProperty(infoboxContent);
             entity.name = "Favorit";
+
+            setTimeout(() => {
+                const iframe = document.querySelector('.cesium-infoBox-iframe');
+                if (iframe) {
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    const imageUploadElement = iframeDoc.getElementById('imageUpload');
+                    const imageLinkElement = iframeDoc.getElementById('imageLink');
+
+                    if (imageUploadElement) {
+                        imageUploadElement.addEventListener('change', function(event) {
+                            const file = event.target.files[0];
+                            if (file) {
+                                const reader = new FileReader();
+                                reader.onload = function(e) {
+                                    const newImageDataUrl = e.target.result;
+                                    localStorage.setItem('favoriteImage-' + id, newImageDataUrl);
+
+                                    const favoriteImageElement = iframeDoc.getElementById('favoriteImage');
+                                    if (favoriteImageElement) {
+                                        favoriteImageElement.src = newImageDataUrl;
+
+                                        // Convert data URL to Blob and create an Object URL
+                                        const byteString = atob(newImageDataUrl.split(',')[1]);
+                                        const mimeString = newImageDataUrl.split(',')[0].split(':')[1].split(';')[0];
+                                        const arrayBuffer = new ArrayBuffer(byteString.length);
+                                        const intArray = new Uint8Array(arrayBuffer);
+                                        for (let i = 0; i < byteString.length; i++) {
+                                            intArray[i] = byteString.charCodeAt(i);
+                                        }
+                                        const blob = new Blob([intArray], { type: mimeString });
+                                        const objectUrl = URL.createObjectURL(blob);
+                                        
+                                        // Update the link's href
+                                        imageLinkElement.href = objectUrl;
+                                        imageLinkElement.target = '_blank';
+                                        imageLinkElement.onclick = function() {
+                                            window.open(objectUrl, '_blank');
+                                        };
+
+                                        // Force the infobox to resize after updating the image
+                                        forceInfoboxResize();
+                                    }
+                                };
+                                reader.readAsDataURL(file);
+                            }
+                        });
+                    }
+
+                    // If the image is already present, set up the link
+                    if (imageLinkElement && imageDataUrl) {
+                        const byteString = atob(imageDataUrl.split(',')[1]);
+                        const mimeString = imageDataUrl.split(',')[0].split(':')[1].split(';')[0];
+                        const arrayBuffer = new ArrayBuffer(byteString.length);
+                        const intArray = new Uint8Array(arrayBuffer);
+                        for (let i = 0; i < byteString.length; i++) {
+                            intArray[i] = byteString.charCodeAt(i);
+                        }
+                        const blob = new Blob([intArray], { type: mimeString });
+                        const objectUrl = URL.createObjectURL(blob);
+
+                        // Update the link's href
+                        imageLinkElement.href = objectUrl;
+                        imageLinkElement.target = '_blank';
+                        imageLinkElement.onclick = function() {
+                            window.open(objectUrl, '_blank');
+                        };
+                    }
+
+                    forceInfoboxResize();
+                }
+            }, 100);
         }
     }
 });
+
+
+
+
+function forceInfoboxResize() {
+    const iframe = document.querySelector('.cesium-infoBox-iframe');
+    if (iframe) {
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+        setTimeout(() => {
+            iframe.style.height = iframeDoc.body.scrollHeight + 'px';
+        }, 0);
+    }
+}
+
+
+
+
 
 // Infobox for Polygons: Add attributes to the Cesium infobox for the new features
 viewer.selectedEntityChanged.addEventListener(function () {
@@ -1457,6 +1680,15 @@ document.getElementById('legendbutton').addEventListener('click', () => {
   );
     GoogletilesetKoeln.show = false;
     viewer.scene.primitives.add(GoogletilesetKoeln);
+    /*GoogletilesetKoeln.style = new Cesium.Cesium3DTileStyle({
+        color: {
+            conditions: [
+                ['true', 'color("white", 0.9)'] // 0.5 is the opacity level
+            ]
+        }
+    });
+    */
+
     
 
     //LoD2 Koeln - Styling auch möglich  
@@ -1635,6 +1867,9 @@ HQselten3D_UG.show = false;
         });
        const wmsStarkregenExtrem =viewer.imageryLayers.addImageryProvider(wmsStarkregenExtremImageryProvider);
 
+      //GeoJSON Features
+        //Pegel Punkt Feature
+        //var geoJsonUrl = 'data/RheinPegel_Koeln_4326.geojson';
 
 // Load GeoJSON data into the viewer
         // As Entity
@@ -1652,7 +1887,20 @@ HQselten3D_UG.show = false;
                 distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0.0, Number.POSITIVE_INFINITY) // Always display the billboard
                 
             }
-            
+            /*label: {
+                text: 'Rhein Pegel Köln', // The text of the label
+                font: '14pt sans-serif', // The font of the label text
+                fillColor: Cesium.Color.WHITE, // The color of the label text
+                outlineColor: Cesium.Color.BLACK, // The outline color of the label text
+                outlineWidth: 2, // The outline width of the label text
+                style: Cesium.LabelStyle.FILL_AND_OUTLINE, // The style of the label text
+                verticalOrigin: Cesium.VerticalOrigin.BOTTOM, // Align the bottom of the label with the coordinate
+                pixelOffset: new Cesium.Cartesian2(0, -40), // Offset the label to be above the billboard
+                disableDepthTestDistance: Number.POSITIVE_INFINITY, // Ensure the label is always visible
+                distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0.0, Number.POSITIVE_INFINITY) // Always display the label
+  
+            }
+            */
         })
         //Set Name and Content für Rheinpegel Box
         RheinPegel.name= "Rhein Pegel Köln";
@@ -1677,6 +1925,25 @@ HQselten3D_UG.show = false;
     
     RheinPegel.show = true;
 
+    //Starkregen Wasserflächen KML aus HEC RAS
+       // Load the Cesium.IonResource from the asset ID
+      /* const resource1 = await Cesium.IonResource.fromAssetId(2601695);
+          const KMLHECRAS = await Cesium.KmlDataSource.load(resource1,{
+            clampToGround: true,
+            camera: viewer.scene.camera,
+            canvas: viewer.scene.canvas,
+          });
+          viewer.dataSources.add(KMLHECRAS);
+          
+        
+
+          //Load KML as converted to GeoJSON
+         /* const resource = await Cesium.IonResource.fromAssetId(2592262);
+          const geojsonHECRAS = await Cesium.GeoJsonDataSource.load(resource,{
+            clampToGround: true
+          });
+          viewer.dataSources.add(geojsonHECRAS);
+*/
     //hide/show layers
       //OSM
        document.getElementById('OSMCheckbox').addEventListener('change', () => {
@@ -1877,6 +2144,9 @@ let boatEntity; // Declare boatEntity in the global scope
     },
   });
 
+  // Set the viewer to track the boat entity
+  //viewer.trackedEntity = boatEntity;
+
 //waypoints for the boat
 const waypoints = [
     Cesium.Cartesian3.fromDegrees(6.966, 50.945),
@@ -1979,14 +2249,80 @@ document.getElementById('stopBoat').addEventListener('click', () => {
     document.getElementById('startBoat').style.display = 'none';
   document.getElementById('stopBoat').style.display = 'none';
 });
+// Boat as 3D Tileset
+/*
+const tileset = await Cesium.Cesium3DTileset.fromIonAssetId(2699753, {
+    //This tileset doesn't have a location, so we're using a modelMatrix to place it at 0, 0 instead of drawing at the center of the earth
+    modelMatrix: Cesium.Transforms.eastNorthUpToFixedFrame(
+      Cesium.Cartesian3.fromDegrees(6.958, 50.930, 200),
+    ),
+  });
+  viewer.scene.primitives.add(tileset);
+  await viewer.zoomTo(tileset);
+
+  // Apply the default style if it exists
+  const extras = tileset.asset.extras;
+  if (
+    Cesium.defined(extras) &&
+    Cesium.defined(extras.ion) &&
+    Cesium.defined(extras.ion.defaultStyle)
+  ) {
+    tileset.style = new Cesium.Cesium3DTileStyle(extras.ion.defaultStyle);
+  }
+  */
+
+  //Building Filter
+  // Event listener for the "Apply Filter" button click
+document.getElementById('filterButton').addEventListener('click', function() {
+    clearSelection(); // Optional: Clear previous selection before applying the new filter
+    const heightValue = parseFloat(document.getElementById('heightInput').value);
+    filterTilesByHeight(heightValue);
+});
+
+// Event listener for the "Clear Selection" button click
+document.getElementById('deleteFilter').addEventListener('click', function() {
+    clearSelection();
+     // Reset the input field to blank
+     document.getElementById('heightInput').value = '';
+});
+
+// Function to filter tiles by "Height" attribute
+function filterTilesByHeight(height) {
+    LoD2Koeln.tileVisible.addEventListener(function(tile) {
+        let meetsHeightCriteria = false;
+        
+        if (tile.content) {
+            // Loop through features if they exist in the tile
+            const featuresLength = tile.content.featuresLength;
+            for (let i = 0; i < featuresLength; i++) {
+                const feature = tile.content.getFeature(i);
+                const featureHeight = feature.getProperty('Height');
+
+                if (featureHeight >= height) {
+                    meetsHeightCriteria = true;
+                    break;
+                }
+            }
+        }
+
+        // Highlight the tile if it meets the height criteria
+        if (meetsHeightCriteria) {
+            tile.color = Cesium.Color.RED.withAlpha(0.5);
+        } else {
+            tile.color = Cesium.Color.WHITE.withAlpha(1.0);
+        }
+    });
+}
+
+// Function to reset the color of all tiles to white
+function clearSelection() {
+    LoD2Koeln.tileVisible.addEventListener(function(tile) {
+        tile.color = Cesium.Color.WHITE.withAlpha(1.0);
+    });
+}
+
 
 </script>
 </body>
 </html>
         
-    
-  </script>
-
-</body>
-
-</html>
