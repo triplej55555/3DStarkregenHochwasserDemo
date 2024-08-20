@@ -29,6 +29,7 @@
         width: 100%;
         height: 100%;
         
+        
     }
     #header{
       display: flex;
@@ -78,11 +79,11 @@
     }
     /* General styles for all infoboxes */
     .cesium-infoBox {
-            background-color: rgba(180, 189, 189, 0.911) ; /* Default infobox background color */
-            color: rgb(247, 244, 244) !important
+            background-color: rgb(178, 183, 183) ; /* Default infobox background color */
+            color: rgb(255, 255, 255) !important
+            
         }
-
-
+  
 .button-container {
   display: flex;
   position: absolute;
@@ -452,6 +453,7 @@
       justify-content: center;
       align-content: center;
         }
+ 
 
 #drawPolygonButton {
   background: white;
@@ -466,6 +468,18 @@
       align-content: center;
         }
 
+        #measureButton {
+  background: white;
+      color: black;
+      padding: 1px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-family: Arial, Helvetica, sans-serif;
+      width: fit-content;
+      align-items: center;
+      justify-content: center;
+      align-content: center;
+        }
 
 
 .smallCheckBox {
@@ -579,6 +593,12 @@
         <i id="deletePolygon" title="Alle Polygone löschen" class="fa fa-trash-o" aria-hidden="true" style="font-size:24px;color:red; position: relative;top: 0px; left: 0px; display: none; margin-right: 2px; margin-left: -1px" ></i>
         
       </button>
+      <button class="btn" id="measureButton"> 
+        <i class="fa-solid fa-ruler" style="font-size: 24px; position: relative;top: 0px; left: 0px; display: inline-block; margin-right: 2px; margin-left: 3px;"></i> 
+        
+        <i id="deleteMeasure"  title="Messung löschen" class="fa fa-trash-o" aria-hidden="true" style="font-size:24px;color:red; position: relative;top: 0px; left: 0px; display: none; margin-right: 2px; margin-left: -1px" ></i>
+        </button>
+
       <button class= "btn" id="counterButton2" style="display: none;" ><strong>Polygone: 0</strong></button>
       <button class="btn" id="floodStatisticButton"><i class="fa-solid fa-house-flood-water" style="font-size: 20px; color: rgb(24, 24, 20); margin-left: 3px; margin-right: 3px;"></i> <strong style="position: relative;top: -3px; left: 0px; margin-right: 2px;">Statistik</strong></button>
       <div class="btn" id="buildingFilterButton">
@@ -785,6 +805,7 @@
 viewer.infoBox.frame.removeAttribute("sandbox");
 viewer.infoBox.frame.setAttribute("sandbox", "allow-same-origin allow-popups allow-forms allow-scripts");
 viewer.infoBox.frame.src = "about:blank";
+
 
 
 //startView and Fly the camera Cologne at the given longitude, latitude, and height.
@@ -1932,7 +1953,7 @@ HQselten3D_UG.show = false;
         })
         //Set Name and Content für Rheinpegel Box
         RheinPegel.name= "Rhein Pegel Köln";
-        RheinPegel.description= ` <iframe id="custom-iframe" width="100%" height="555px" src="https://www.pegelonline.wsv.de/charts/OnlineVisualisierungGanglinie?pegeluuid=a6ee8177-107b-47dd-bcfd-30960ccc6e9c" frameborder="0" allowfullscreen></iframe>`;
+        RheinPegel.description= ` <iframe id="custom-iframe" width="100%" height="555px" style="background-color: white; border: 3px solid black;" src="https://www.pegelonline.wsv.de/charts/OnlineVisualisierungGanglinie?pegeluuid=a6ee8177-107b-47dd-bcfd-30960ccc6e9c" frameborder="0" allowfullscreen></iframe>`;
           //<p> Weitere Informationen: 
           //<a href="https://www.pegelonline.wsv.de/gast/pegeltabelle"> Rhein Pegel Köln</a>
           //</p>
@@ -2381,6 +2402,221 @@ document.getElementById("locationButton").addEventListener("click", function() {
     navigator.geolocation.getCurrentPosition(fly);
 });
 
+//Measure Function
+var camera = viewer.camera;
+        var scene = viewer.scene;
+        var globe = scene.globe;
+        var ellipsoid = Cesium.Ellipsoid.WGS84;
+        var geodesic = new Cesium.EllipsoidGeodesic();
+            
+
+        var isMeasuring = false; // Flag to track the measurement mode
+var points, polylines;
+var measureHandler; // New handler specifically for measurement
+var distanceLabel, verticalLabel, horizontalLabel; // Labels for measurement
+
+document.getElementById('measureButton').addEventListener('click', function() {
+    isMeasuring = !isMeasuring; // Toggle measurement mode
+
+    if (isMeasuring) {
+        // Initialize collections and handler when measuring is activated
+        points = scene.primitives.add(new Cesium.PointPrimitiveCollection());
+        polylines = scene.primitives.add(new Cesium.PolylineCollection());
+        measureHandler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
+        document.getElementById('deleteMeasure').style.display = 'inline-block';
+        // Add distance label
+        var point1, point2;
+        var point1GeoPosition, point2GeoPosition;
+        var polyline1, polyline2, polyline3;
+        var LINEPOINTCOLOR = Cesium.Color.RED;
+
+        var label = {
+            font: '14px monospace',
+            showBackground: true,
+            horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+            verticalOrigin: Cesium.VerticalOrigin.CENTER,
+            pixelOffset: new Cesium.Cartesian2(0, 0),
+            eyeOffset: new Cesium.Cartesian3(0, 0, -50),
+            fillColor: Cesium.Color.WHITE,
+        };
+
+        function addDistanceLabel(point1, point2, height) {
+            point1.cartographic = ellipsoid.cartesianToCartographic(point1.position);
+            point2.cartographic = ellipsoid.cartesianToCartographic(point2.position);
+            point1.longitude = parseFloat(Cesium.Math.toDegrees(point1.position.x));
+            point1.latitude = parseFloat(Cesium.Math.toDegrees(point1.position.y));
+            point2.longitude = parseFloat(Cesium.Math.toDegrees(point2.position.x));
+            point2.latitude = parseFloat(Cesium.Math.toDegrees(point2.position.y));
+            label.text = getHorizontalDistanceString(point1, point2);
+            horizontalLabel = viewer.entities.add({
+                position: getMidpoint(point1, point2, point1GeoPosition.height),
+                label: label
+            });
+            label.text = getDistanceString(point1, point2);
+            distanceLabel = viewer.entities.add({
+                position: getMidpoint(point1, point2, height),
+                label: label
+            });
+            label.text = getVerticalDistanceString();
+            verticalLabel = viewer.entities.add({
+                position: getMidpoint(point2, point2, height),
+                label: label
+            });
+        }
+
+        function getHorizontalDistanceString(point1, point2) {
+            geodesic.setEndPoints(point1.cartographic, point2.cartographic);
+            var meters = geodesic.surfaceDistance.toFixed(2);
+            if (meters >= 1000) {
+                return (meters / 1000).toFixed(1) + ' км';
+            }
+            return meters + ' м';
+        }
+
+        function getVerticalDistanceString() {
+            var heights = [point1GeoPosition.height, point2GeoPosition.height];
+            var meters = Math.max.apply(Math, heights) - Math.min.apply(Math, heights);
+            if (meters >= 1000) {
+                return (meters / 1000).toFixed(1) + ' км';
+            }
+            return meters.toFixed(2) + ' м';
+        }
+
+        function getDistanceString(point1, point2) {
+            geodesic.setEndPoints(point1.cartographic, point2.cartographic);
+            var horizontalMeters = geodesic.surfaceDistance.toFixed(2);
+            var heights = [point1GeoPosition.height, point2GeoPosition.height];
+            var verticalMeters = Math.max.apply(Math, heights) - Math.min.apply(Math, heights);
+            var meters = Math.pow((Math.pow(horizontalMeters, 2) + Math.pow(verticalMeters, 2)), 0.5);
+
+            if (meters >= 1000) {
+                return (meters / 1000).toFixed(1) + ' км';
+            }
+            return meters.toFixed(2) + ' м';
+        }
+
+        function getMidpoint(point1, point2, height) {
+            var scratch = new Cesium.Cartographic();
+            geodesic.setEndPoints(point1.cartographic, point2.cartographic);
+            var midpointCartographic = geodesic.interpolateUsingFraction(0.5, scratch);
+            return Cesium.Cartesian3.fromRadians(midpointCartographic.longitude, midpointCartographic.latitude, height);
+        }
+
+        measureHandler.setInputAction(function(click) {
+            if (isMeasuring && scene.mode !== Cesium.SceneMode.MORPHING) {
+                var pickedObject = scene.pick(click.position);
+                if (scene.pickPositionSupported && Cesium.defined(pickedObject)) {
+                    var cartesian = viewer.scene.pickPosition(click.position);
+                    if (Cesium.defined(cartesian)) {
+                        if (points.length === 2) {
+                            points.removeAll();
+                            polylines.removeAll();
+                            removeLabels();
+                        }
+                        // Add the first point
+                        if (points.length === 0) {
+                            point1 = points.add({
+                                position: new Cesium.Cartesian3(cartesian.x, cartesian.y, cartesian.z),
+                                color: LINEPOINTCOLOR
+                            });
+                        }
+                        // Add the second point and lines
+                        else if (points.length === 1) {
+                            point2 = points.add({
+                                position: new Cesium.Cartesian3(cartesian.x, cartesian.y, cartesian.z),
+                                color: LINEPOINTCOLOR
+                            });
+                            point1GeoPosition = Cesium.Cartographic.fromCartesian(point1.position);
+                            point2GeoPosition = Cesium.Cartographic.fromCartesian(point2.position);
+
+                            var pl1Positions = [
+                                new Cesium.Cartesian3.fromRadians(point1GeoPosition.longitude, point1GeoPosition.latitude, point1GeoPosition.height),
+                                new Cesium.Cartesian3.fromRadians(point2GeoPosition.longitude, point2GeoPosition.latitude, point2GeoPosition.height)
+                            ];
+                            var pl2Positions = [
+                                new Cesium.Cartesian3.fromRadians(point2GeoPosition.longitude, point2GeoPosition.latitude, point2GeoPosition.height),
+                                new Cesium.Cartesian3.fromRadians(point2GeoPosition.longitude, point2GeoPosition.latitude, point1GeoPosition.height)
+                            ];
+                            var pl3Positions = [
+                                new Cesium.Cartesian3.fromRadians(point1GeoPosition.longitude, point1GeoPosition.latitude, point1GeoPosition.height),
+                                new Cesium.Cartesian3.fromRadians(point2GeoPosition.longitude, point2GeoPosition.latitude, point1GeoPosition.height)
+                            ];
+
+                            polyline1 = polylines.add({
+                                show: true,
+                                positions: pl1Positions,
+                                width: 1,
+                                material: new Cesium.Material({
+                                    fabric: {
+                                        type: 'Color',
+                                        uniforms: {
+                                            color: LINEPOINTCOLOR
+                                        }
+                                    }
+                                })
+                            });
+                            polyline2 = polylines.add({
+                                show: true,
+                                positions: pl2Positions,
+                                width: 1,
+                                material: new Cesium.Material({
+                                    fabric: {
+                                        type: 'PolylineDash',
+                                        uniforms: {
+                                            color: LINEPOINTCOLOR,
+                                        }
+                                    },
+                                })
+                            });
+                            polyline3 = polylines.add({
+                                show: true,
+                                positions: pl3Positions,
+                                width: 1,
+                                material: new Cesium.Material({
+                                    fabric: {
+                                        type: 'PolylineDash',
+                                        uniforms: {
+                                            color: LINEPOINTCOLOR,
+                                        }
+                                    },
+                                })
+                            });
+                            var labelZ;
+                            if (point2GeoPosition.height >= point1GeoPosition.height) {
+                                labelZ = point1GeoPosition.height + (point2GeoPosition.height - point1GeoPosition.height) / 2.0;
+                            } else {
+                                labelZ = point2GeoPosition.height + (point1GeoPosition.height - point2GeoPosition.height) / 2.0;
+                            };
+
+                            addDistanceLabel(point1, point2, labelZ);
+
+                        }
+                    }
+                }
+            }
+        }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+    } else {
+        // Clear any ongoing measurements and remove handlers when measuring is deactivated
+        if (points) points.removeAll();
+        if (polylines) polylines.removeAll();
+        if (measureHandler) measureHandler.destroy();
+        removeLabels();
+        document.getElementById('deleteMeasure').style.display = 'none';
+    }
+});
+
+// Function to remove all distance labels
+function removeLabels() {
+    if (viewer && viewer.entities) {
+        if (distanceLabel) viewer.entities.remove(distanceLabel);
+        if (horizontalLabel) viewer.entities.remove(horizontalLabel);
+        if (verticalLabel) viewer.entities.remove(verticalLabel);
+
+        distanceLabel = null;
+        horizontalLabel = null;
+        verticalLabel = null;
+    }
+}
 
 </script>
 </body>
